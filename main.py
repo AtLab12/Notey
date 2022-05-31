@@ -1,3 +1,4 @@
+import asyncio
 import Authorization as authC
 
 def printMenu():
@@ -13,7 +14,7 @@ def printMenu():
     print('\n')
 
 
-def runNotey():
+async def runNotey():
     print("Welcome to Notey!")
 
     printMenu()
@@ -21,18 +22,20 @@ def runNotey():
 
     while True:
         if choice == 1:
-            user = authC.signUp()
-            if user is None:
-                print("Registration unsuccessful. Please try again")
+            userLoop = asyncio.create_task(authC.signUp())
+            await userLoop
+            #if userLoop is None:
+                #print("Registration unsuccessful. Please try again")
         elif choice == 2:
             authC.login()
+            user = authC.login()
         elif choice == 4:
             break
         else:
             print("Invalid selection. Please try again.")
 
         printMenu()
+        choice = int(input("Please type your selection: "))
 
 
-
-runNotey()
+asyncio.run(runNotey())

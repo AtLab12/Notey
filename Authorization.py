@@ -2,6 +2,7 @@ import json
 import pyrebase
 import re
 import requests
+import asyncio
 
 firebaseConfig = {
     'apiKey': "AIzaSyCkXdB3mIonc9F6Ic9D_0rDYc2HLInuxdc",
@@ -16,8 +17,9 @@ firebaseConfig = {
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
+db = firebase.database()
 
-def signUp():
+async def signUp():
     print("""
     You are about to begin the registration process.
     Please make sure you fill all filed correctly
@@ -37,16 +39,26 @@ def signUp():
         passwordValidation = input("Pleas provide password again: ")
 
     try:
-        user = auth.create_user_with_email_and_password(email, password)
-        return user
+        loop = asyncio.get_event_loop()
+        userTask = loop.run_in_executor(None, auth.create_user_with_email_and_password, email, password)
     except requests.exceptions.HTTPError as e:
         error_json = e.args[1]
         error = json.loads(error_json)['error']['message']
         if error == "EMAIL_EXISTS":
             print("Email already exists")
 
+    await userTask
+    dataTaskCreation = asyncio.create_task(createUserDetails(email))
+    await dataTaskCreation
+
+    print(userTask.result()["email"])
+
+
 def login():
     email = input("Please provide email: ")
+
+    if email == "back":
+        return
 
     while (not validateEmail(email)):
         print("\n !!! Invalid email provided, please try again !!! \n")
@@ -56,13 +68,43 @@ def login():
 
     try:
         user = auth.sign_in_with_email_and_password(email, password)
+        print("Welcome back!")
+        return user
     except:
-        pass
+        print("Invalid email or password")
 
+async def createUserDetails(email):
+    nick = input("Please provide nick name: ")
+    loop = asyncio.get_event_loop()
+    userTask = loop.run_in_executor(None, validateNickName, nick)
+    await userTask
 
+    while len(userTask.result().val()) != 0:
+        print("This username is already taken. Please try a different one")
+        nick = input("Please provide nick name: ")
+        userTask = loop.run_in_executor(None, validateNickName, nick)
+        await userTask
+
+    name = input("Please provide your name: ")
+    lastName = input("Please provide your last name: ")
+
+    data = { "nick": nick, "name": name, "lastName": lastName, "email": email}
+    try:
+        db.child("users").push(data)
+    except:
+        raise
+
+def validateNickName(nick):
+    try:
+         owner = db.child("users").order_by_child("nick").equal_to(nick).get()
+         return owner
+    except:
+        raise
+
+#1@pwr.edu.pl
 
 def validateEmail(email):
-    regex = '^(.*?)@(.*?)(pwr.edu.pl)'
+    regex = '^(.*?)@(.*?)(pl)' # dodac pwr.edu.pl
     if email != None:
         if re.match(regex, email):
             return True
