@@ -22,13 +22,16 @@ async def runNotey():
 
     while True:
         if choice == 1:
-            userLoop = asyncio.create_task(authC.signUp())
-            await userLoop
-            #if userLoop is None:
-                #print("Registration unsuccessful. Please try again")
+            registrationTask = asyncio.create_task(authC.signUp())
+            await registrationTask
+            if registrationTask.result() == '':
+                print("Registration unsuccessful. Please try again")
         elif choice == 2:
-            authC.login()
-            user = authC.login()
+            loginTask = asyncio.create_task(authC.login())
+            await loginTask
+        elif choice == 3:
+            pasResettask = asyncio.create_task(authC.passwordReset())
+            await pasResettask
         elif choice == 4:
             break
         else:

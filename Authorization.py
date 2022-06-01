@@ -25,6 +25,7 @@ async def signUp():
     Please make sure you fill all filed correctly
     """)
     email = input("Please provide email: ")
+    emailCloudValidated = False
 
     while(not validateEmail(email)):
         print("\n !!! Invalid email provided, please try again !!! \n")
@@ -38,23 +39,26 @@ async def signUp():
         password = input("Pleas provide password: ")
         passwordValidation = input("Pleas provide password again: ")
 
-    try:
-        loop = asyncio.get_event_loop()
-        userTask = loop.run_in_executor(None, auth.create_user_with_email_and_password, email, password)
-    except requests.exceptions.HTTPError as e:
-        error_json = e.args[1]
-        error = json.loads(error_json)['error']['message']
-        if error == "EMAIL_EXISTS":
-            print("Email already exists")
+    while not emailCloudValidated:
+        try:
+            loop = asyncio.get_event_loop()
+            userTask = loop.run_in_executor(None, auth.create_user_with_email_and_password, email, password)
+            await userTask
+            emailCloudValidated = True
+        except requests.exceptions.HTTPError as e:
+            error_json = e.args[1]
+            error = json.loads(error_json)['error']['message']
+            if error == "EMAIL_EXISTS":
+                emailCloudValidated = False
+                print("Email already exists")
+                email = input("Please provide email: ")
 
-    await userTask
     dataTaskCreation = asyncio.create_task(createUserDetails(email))
     await dataTaskCreation
+    return userTask.result()["email"]
 
-    print(userTask.result()["email"])
 
-
-def login():
+async def login():
     email = input("Please provide email: ")
 
     if email == "back":
@@ -64,14 +68,16 @@ def login():
         print("\n !!! Invalid email provided, please try again !!! \n")
         email = input("Please provide email: ")
 
-    password = input("Pleas provide password: ")
+    password = input("Please provide password: ")
 
     try:
-        user = auth.sign_in_with_email_and_password(email, password)
-        print("Welcome back!")
-        return user
+        loop = asyncio.get_event_loop()
+        userLogintask = loop.run_in_executor(None, auth.sign_in_with_email_and_password, email, password)
+        await userLogintask
+        return userLogintask.result()
     except:
-        print("Invalid email or password")
+        print("Invalid email or password. Please try again.")
+        return None
 
 async def createUserDetails(email):
     nick = input("Please provide nick name: ")
@@ -87,12 +93,30 @@ async def createUserDetails(email):
 
     name = input("Please provide your name: ")
     lastName = input("Please provide your last name: ")
-
-    data = { "nick": nick, "name": name, "lastName": lastName, "email": email}
+    data = {
+        "nick": nick,
+        "name": name,
+        "lastName": lastName,
+        "email": email
+    }
     try:
         db.child("users").push(data)
     except:
         raise
+
+async def passwordReset():
+    email = input("Please provide email: ")
+
+    if email == "back":
+        return
+
+    while (not validateEmail(email)):
+        print("\n !!! Invalid email provided, please try again !!! \n")
+        email = input("Please provide email: ")
+
+    loop = asyncio.get_event_loop()
+    task = loop.run_in_executor(None, auth.send_password_reset_email, email)
+    await task
 
 def validateNickName(nick):
     try:
@@ -100,8 +124,6 @@ def validateNickName(nick):
          return owner
     except:
         raise
-
-#1@pwr.edu.pl
 
 def validateEmail(email):
     regex = '^(.*?)@(.*?)(pl)' # dodac pwr.edu.pl
