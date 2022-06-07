@@ -8,12 +8,11 @@ def printMenu():
         3: 'Forgot password',
         4: 'Finish'
     }
-
     for key in menu.keys():
         print(key, menu[key])
     print('\n')
 
-
+#259431@student.pwr.edu.pl
 async def runNotey():
     print("Welcome to Notey!")
 
@@ -29,6 +28,8 @@ async def runNotey():
         elif choice == 2:
             loginTask = asyncio.create_task(authC.login())
             await loginTask
+            if loginTask.result()['email'] != '':
+                print(loginTask.result()['email'])
         elif choice == 3:
             pasResettask = asyncio.create_task(authC.passwordReset())
             await pasResettask
@@ -40,5 +41,7 @@ async def runNotey():
         printMenu()
         choice = int(input("Please type your selection: "))
 
+async def runMain():
+    print("Please select one of the following options: ")
 
 asyncio.run(runNotey())

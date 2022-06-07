@@ -22,7 +22,7 @@ db = firebase.database()
 async def signUp():
     print("""
     You are about to begin the registration process.
-    Please make sure you fill all filed correctly
+    Please make sure you fill all fields correctly
     """)
     email = input("Please provide email: ")
     emailCloudValidated = False
