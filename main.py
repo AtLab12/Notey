@@ -1,5 +1,6 @@
 import asyncio
 import Authorization as authC
+import DataFlow as dataF
 
 def printMenu():
     menu = {
@@ -12,12 +13,17 @@ def printMenu():
         print(key, menu[key])
     print('\n')
 
-#259431@student.pwr.edu.pl
+#       259431@student.pwr.edu.pl
+
 async def runNotey():
+    """
+    Method enables login or registration.
+    :return:
+    """
     print("Welcome to Notey!")
 
     printMenu()
-    choice = int(input("Please type your selection: "))
+    choice = handleSelection()
 
     while True:
         if choice == 1:
@@ -28,8 +34,11 @@ async def runNotey():
         elif choice == 2:
             loginTask = asyncio.create_task(authC.login())
             await loginTask
-            if loginTask.result()['email'] != '':
-                print(loginTask.result()['email'])
+            email = loginTask.result()['email']
+            if email != '':
+                getUserTask = dataF.getUserdata(email)
+                await getUserTask
+                await runMain()
         elif choice == 3:
             pasResettask = asyncio.create_task(authC.passwordReset())
             await pasResettask
@@ -39,9 +48,46 @@ async def runNotey():
             print("Invalid selection. Please try again.")
 
         printMenu()
-        choice = int(input("Please type your selection: "))
+        choice = handleSelection()
+
+
+def printMainMenu():
+    menu = {
+        1: 'Friends',
+        2: 'Notes'
+    }
+    for key in menu.keys():
+        print(key, menu[key])
+    print('\n')
 
 async def runMain():
+    """
+    This method is the center of the whole project.
+    It handles all functionalities for logged in user.
+    :return:
+    """
     print("Please select one of the following options: ")
+    printMainMenu()
+    choice = handleSelection()
+
+    while True:
+        if choice == 1:
+            pass
+        if choice == 2:
+            pass
+        printMainMenu()
+        choice = handleSelection()
+
+def handleSelection():
+    """
+    Method protects program from invalid input
+    :return:
+    """
+    selection = input("Please type your selection: ")
+    while not selection.isdigit():
+        print("\n Invalid input \n")
+        selection = input("Please type your selection: ")
+
+    return int(selection)
 
 asyncio.run(runNotey())

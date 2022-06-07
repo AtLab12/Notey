@@ -20,6 +20,12 @@ auth = firebase.auth()
 db = firebase.database()
 
 async def signUp():
+    """
+    Method handles the whole sign up process
+    Creates auth object used later to authenticate using email and password
+    :return:
+    """
+
     print("""
     You are about to begin the registration process.
     Please make sure you fill all fields correctly
@@ -59,6 +65,11 @@ async def signUp():
 
 
 async def login():
+    """
+    Method handles the whole login process
+    :return:
+    """
+
     email = input("Please provide email: ")
 
     if email == "back":
@@ -80,6 +91,13 @@ async def login():
         return None
 
 async def createUserDetails(email):
+    """
+    Creates user with specified parameters in the database.
+    :param email:
+    String representing users email address
+    :return:
+    """
+
     nick = input("Please provide nick name: ")
     loop = asyncio.get_event_loop()
     userTask = loop.run_in_executor(None, validateNickName, nick)
@@ -105,6 +123,10 @@ async def createUserDetails(email):
         raise
 
 async def passwordReset():
+    """
+    Sends to an email provided via user input with password reset link.
+    :return:
+    """
     email = input("Please provide email: ")
 
     if email == "back":
@@ -118,14 +140,26 @@ async def passwordReset():
     task = loop.run_in_executor(None, auth.send_password_reset_email, email)
     await task
 
-def validateNickName(nick):
+def validateNickName(nick: str):
+    """
+    Checks if user with certain nickname doesn't already exist
+    :param nick:
+    String representing users nickname
+    :return:
+    """
     try:
          owner = db.child("users").order_by_child("nick").equal_to(nick).get()
          return owner
     except:
         raise
 
-def validateEmail(email):
+def validateEmail(email: str):
+    """
+    Checks if provided email fits the standarized form
+    :param email:
+    String representing users email address
+    :return:
+    """
     regex = '^(.*?)@(.*?)(pl)' # dodac pwr.edu.pl
     if email != None:
         if re.match(regex, email):
