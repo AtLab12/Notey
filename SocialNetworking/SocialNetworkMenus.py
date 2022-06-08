@@ -1,8 +1,9 @@
 import asyncio
 import MenusUtility.MenuUtility as mUtility
 import Data.dataManager as dataM
+import SocialNetworking.SocialNetwork as socialNet
 
-def printFriendMenu():
+def print_friend_menu():
     menu = {
         1: "See your friends",
         2: "Check for new requests",
@@ -16,14 +17,14 @@ def printFriendMenu():
     print('\n')
 
 
-async def runFriends():
+async def run_friends():
     """
     Presents frinds section menu
     :return:
     """
     print("Please select one of the following options: ")
-    printFriendMenu()
-    choice = mUtility.handleSelection()
+    print_friend_menu()
+    choice = mUtility.handle_selection()
 
     while True:
         if choice == 1:
@@ -31,11 +32,14 @@ async def runFriends():
         if choice == 2:
             pass
         if choice == 3:
-            pass
+            print("\n Please provide your friend nickname: ")
+            nick = input("Type here: ")
+            request_task = socialNet.checkIfUserExists(nick)
+            await request_task
         if choice == 4:
             pass
         if choice == 5:
             pass
 
-        printFriendMenu()
-        choice = mUtility.handleSelection()
+        print_friend_menu()
+        choice = mUtility.handle_selection()

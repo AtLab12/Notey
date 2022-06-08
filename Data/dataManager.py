@@ -1,10 +1,26 @@
-"""
-stores users data synchronized with app's state
-"""
+import asyncio
+import requests
+import pyrebase
+import json
 
 user = {}
+firebaseConfig = {
+    'apiKey': "AIzaSyCkXdB3mIonc9F6Ic9D_0rDYc2HLInuxdc",
+    'authDomain': "notey-ee724.firebaseapp.com",
+    'databaseURL': "https://notey-ee724-default-rtdb.europe-west1.firebasedatabase.app/",
+    'projectId': "notey-ee724",
+    'storageBucket': "notey-ee724.appspot.com",
+    'messagingSenderId': "161243066116",
+    'appId': "1:161243066116:web:d19d76f55139e0c50f2a51",
+    'measurementId': "G-73LBDN21LX"
+};
 
-def showProfileDetails():
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
+db = firebase.database()
+
+
+def show_profile_details():
     """
     Presents ony identifying data associated with currently logged user
     :return:
@@ -15,3 +31,35 @@ def showProfileDetails():
         print("Lastname: ", user["lastName"], "\n")
     else:
         print("\n Unexpected error occured \n")
+
+
+async def check_if_user_exists(nick: str):
+    """
+    Checks if there is a user with provided nickname in the database
+    :param nick:
+    Users of interest nickname
+    :return:
+    Touple with fields representing:
+    1. Bool stating weather user with provided nickname exists
+    2. If user exists then his id
+    """
+    loop = asyncio.get_event_loop()
+    check_task = loop.run_in_executor(None, get_user_by_nick_call, nick)
+    result = await check_task
+    if not result.val():
+        print("User with this nick name does not exist\n")
+        return False, None
+    else:
+        id = next(iter((result.val().keys())))
+        return True, id
+
+
+def get_user_by_nick_call(nick: str):
+    try:
+        user = db.child("users").order_by_child("nick").equal_to(nick).get()
+        return user
+    except requests.exceptions.HTTPError as e:
+        error_json = e.args[1]
+        error_message = json.loads(error_json)['error']['message']
+        print(error_message)
+        return

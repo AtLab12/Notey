@@ -3,21 +3,8 @@ import pyrebase
 import re
 import requests
 import asyncio
+import Data.dataManager as dataM
 
-firebaseConfig = {
-    'apiKey': "AIzaSyCkXdB3mIonc9F6Ic9D_0rDYc2HLInuxdc",
-    'authDomain': "notey-ee724.firebaseapp.com",
-    'databaseURL': "https://notey-ee724-default-rtdb.europe-west1.firebasedatabase.app/",
-    'projectId': "notey-ee724",
-    'storageBucket': "notey-ee724.appspot.com",
-    'messagingSenderId': "161243066116",
-    'appId': "1:161243066116:web:d19d76f55139e0c50f2a51",
-    'measurementId': "G-73LBDN21LX"
-  };
-
-firebase = pyrebase.initialize_app(firebaseConfig)
-auth = firebase.auth()
-db = firebase.database()
 
 async def signUp():
     """
@@ -31,36 +18,36 @@ async def signUp():
     Please make sure you fill all fields correctly
     """)
     email = input("Please provide email: ")
-    emailCloudValidated = False
+    email_cloud_validated = False
 
-    while(not validateEmail(email)):
+    while not validate_email(email):
         print("\n !!! Invalid email provided, please try again !!! \n")
         email = input("Please provide email: ")
 
     password = input("Pleas provide password: ")
-    passwordValidation = input("Pleas provide password again: ")
+    password_validation = input("Pleas provide password again: ")
 
-    while (password != passwordValidation or len(password) < 8):
+    while password != password_validation or len(password) < 8:
         print("\n !!! Passwords don't mach, please try again !!! \n ")
         password = input("Pleas provide password: ")
-        passwordValidation = input("Pleas provide password again: ")
+        password_validation = input("Pleas provide password again: ")
 
-    while not emailCloudValidated:
+    while not email_cloud_validated:
         try:
             loop = asyncio.get_event_loop()
-            userTask = loop.run_in_executor(None, auth.create_user_with_email_and_password, email, password)
+            userTask = loop.run_in_executor(None, dataM.auth.create_user_with_email_and_password, email, password)
             await userTask
-            emailCloudValidated = True
+            email_cloud_validated = True
         except requests.exceptions.HTTPError as e:
             error_json = e.args[1]
             error = json.loads(error_json)['error']['message']
             if error == "EMAIL_EXISTS":
-                emailCloudValidated = False
+                email_cloud_validated = False
                 print("Email already exists")
                 email = input("Please provide email: ")
 
-    dataTaskCreation = asyncio.create_task(createUserDetails(email))
-    await dataTaskCreation
+    data_task_creation = asyncio.create_task(create_user_details(email))
+    await data_task_creation
     return userTask.result()["email"]
 
 
@@ -70,29 +57,30 @@ async def login():
     :return:
     """
 
-    #email = input("Please provide email: ")
+    # email = input("Please provide email: ")
     email = "259431@student.pwr.edu.pl"
 
     if email == "back":
         return
 
-    while (not validateEmail(email)):
+    while not validate_email(email):
         print("\n !!! Invalid email provided, please try again !!! \n")
         email = input("Please provide email: ")
 
-    #password = input("Please provide password: ")
+    # password = input("Please provide password: ")
     password = "12345678"
 
     try:
         loop = asyncio.get_event_loop()
-        userLogintask = loop.run_in_executor(None, auth.sign_in_with_email_and_password, email, password)
-        await userLogintask
-        return userLogintask.result()
+        user_logintask = loop.run_in_executor(None, dataM.auth.sign_in_with_email_and_password, email, password)
+        await user_logintask
+        return user_logintask.result()
     except:
         print("Invalid email or password. Please try again.")
         return None
 
-async def createUserDetails(email):
+
+async def create_user_details(email):
     """
     Creates user with specified parameters in the database.
     :param email:
@@ -102,29 +90,30 @@ async def createUserDetails(email):
 
     nick = input("Please provide nick name: ")
     loop = asyncio.get_event_loop()
-    userTask = loop.run_in_executor(None, validateNickName, nick)
-    await userTask
+    user_task = loop.run_in_executor(None, validate_nick_name, nick)
+    await user_task
 
-    while len(userTask.result().val()) != 0:
+    while len(user_task.result().val()) != 0:
         print("This username is already taken. Please try a different one")
         nick = input("Please provide nick name: ")
-        userTask = loop.run_in_executor(None, validateNickName, nick)
-        await userTask
+        user_task = loop.run_in_executor(None, validate_nick_name, nick)
+        await user_task
 
     name = input("Please provide your name: ")
-    lastName = input("Please provide your last name: ")
+    last_name = input("Please provide your last name: ")
     data = {
         "nick": nick,
         "name": name,
-        "lastName": lastName,
+        "last_name": last_name,
         "email": email
     }
     try:
-        db.child("users").push(data)
+        dataM.db.child("users").push(data)
     except:
         raise
 
-async def passwordReset():
+
+async def password_reset():
     """
     Sends to an email provided via user input with password reset link.
     :return:
@@ -134,15 +123,16 @@ async def passwordReset():
     if email == "back":
         return
 
-    while (not validateEmail(email)):
+    while not validate_email(email):
         print("\n !!! Invalid email provided, please try again !!! \n")
         email = input("Please provide email: ")
 
     loop = asyncio.get_event_loop()
-    task = loop.run_in_executor(None, auth.send_password_reset_email, email)
+    task = loop.run_in_executor(None, dataM.auth.send_password_reset_email, email)
     await task
 
-def validateNickName(nick: str):
+
+def validate_nick_name(nick: str):
     """
     Checks if user with certain nickname doesn't already exist
     :param nick:
@@ -150,22 +140,22 @@ def validateNickName(nick: str):
     :return:
     """
     try:
-         owner = db.child("users").order_by_child("nick").equal_to(nick).get()
-         return owner
+        owner = dataM.db.child("users").order_by_child("nick").equal_to(nick).get()
+        return owner
     except:
         raise
 
-def validateEmail(email: str):
+
+def validate_email(email: str):
     """
     Checks if provided email fits the standarized form
     :param email:
     String representing users email address
     :return:
     """
-    regex = '^(.*?)@(.*?)' # dodac (pwr.edu.pl) po (.*?)
-    if email != None:
+    regex = '^(.*?)@(.*?)'  # dodac (pwr.edu.pl) po (.*?)
+    if email is not None:
         if re.match(regex, email):
             return True
     else:
         return False
-

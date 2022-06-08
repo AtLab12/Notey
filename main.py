@@ -5,7 +5,8 @@ from SocialNetworking import SocialNetworkMenus as socialNMenus
 import MenusUtility.MenuUtility as mUtility
 import Data.dataManager as dataM
 
-def printMenu():
+
+def print_menu():
     menu = {
         1: 'Register',
         2: 'Login',
@@ -16,45 +17,46 @@ def printMenu():
         print(key, menu[key])
     print('\n')
 
+
 #       259431@student.pwr.edu.pl
 
-async def runNotey():
+async def run_notey():
     """
     Method enables login or registration.
     :return:
     """
     print("Welcome to Notey!")
 
-    printMenu()
-    choice = mUtility.handleSelection()
+    print_menu()
+    choice = mUtility.handle_selection()
 
     while True:
         if choice == 1:
-            registrationTask = asyncio.create_task(authC.signUp())
-            await registrationTask
-            if registrationTask.result() == '':
+            registration_task = asyncio.create_task(authC.signUp())
+            await registration_task
+            if registration_task.result() == '':
                 print("Registration unsuccessful. Please try again")
         elif choice == 2:
-            loginTask = asyncio.create_task(authC.login())
-            await loginTask
-            email = loginTask.result()['email']
+            login_task = asyncio.create_task(authC.login())
+            await login_task
+            email = login_task.result()['email']
             if email != '':
-                getUserTask = dataF.getUserdata(email)
-                dataM.user = await getUserTask
-                await runMain()
+                get_user_task = dataF.getUserdata(email)
+                dataM.user = await get_user_task
+                await run_main()
         elif choice == 3:
-            pasResettask = asyncio.create_task(authC.passwordReset())
+            pasResettask = asyncio.create_task(authC.password_reset())
             await pasResettask
         elif choice == 4:
             break
         else:
             print("Invalid selection. Please try again.")
 
-        printMenu()
-        choice = mUtility.handleSelection()
+        print_menu()
+        choice = mUtility.handle_selection()
 
 
-def printMainMenu():
+def print_main_menu():
     menu = {
         1: 'Friends',
         2: 'Notes',
@@ -65,29 +67,29 @@ def printMainMenu():
         print(key, menu[key])
     print('\n')
 
-async def runMain():
+
+async def run_main():
     """
     This method is the center of the whole project.
     It handles all functionalities for logged in user.
     :return:
     """
     print("Please select one of the following options: ")
-    printMainMenu()
-    choice = mUtility.handleSelection()
+    print_main_menu()
+    choice = mUtility.handle_selection()
 
     while True:
         if choice == 1:
-            await socialNMenus.runFriends()
+            await socialNMenus.run_friends()
         if choice == 2:
             pass
         if choice == 3:
-            dataM.showProfileDetails()
+            dataM.show_profile_details()
         if choice == 4:
             dataM.user = {}
             break
-        printMainMenu()
-        choice = mUtility.handleSelection()
+        print_main_menu()
+        choice = mUtility.handle_selection()
 
 
-
-asyncio.run(runNotey())
+asyncio.run(run_notey())
