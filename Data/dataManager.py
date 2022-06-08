@@ -52,6 +52,12 @@ async def get_user(nick: str):
         id = next(iter((result.val().keys())))
         return result.val().get(id), id
 
+async def refresh_data():
+    global user
+    task = get_user(user["nick"])
+    result = await task
+    user = result[0]
+
 
 def get_user_by_nick_call(nick: str):
     try:
@@ -62,5 +68,3 @@ def get_user_by_nick_call(nick: str):
         error_message = json.loads(error_json)['error']['message']
         print(error_message)
         return
-
-#get friends

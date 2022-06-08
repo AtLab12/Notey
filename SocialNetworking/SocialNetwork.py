@@ -4,9 +4,7 @@ import requests
 import json
 import Data.dataManager as dataM
 import DataFlow as dataF
-
 import pyrebase
-
 
 # search friends
 
@@ -25,7 +23,12 @@ async def send_request(nick: str):
     user_data = await check_task
 
     if user_data[0] is not None:
-        req = user_data[0]["requests"]
+
+        if "requests" in user_data[0]:
+            req = user_data[0]["requests"]
+        else:
+            req = []
+
         my_nick = dataM.user["nick"]
         if my_nick not in req:
             req.append(dataM.user["nick"])
@@ -38,7 +41,7 @@ async def handle_myrequests():
     """
     Refreshes users current data
     Shows all requests
-    Handles request acceptance
+    Handles request acceptance for both users
     :return:
     """
     task = dataF.getUserdata(dataM.user["email"])
@@ -67,16 +70,37 @@ async def handle_myrequests():
             if int(new_friend) >= index:
                 print("uups. I'm afraid you are not interesting enough to have ", new_friend, "new requests.\n")
             else:
+                new_friend_nick = dataM.user["requests"][int(new_friend)]
+                new_friend_data_task = dataM.get_user(new_friend_nick)
+                new_friend_data_task_result = await new_friend_data_task
+                new_friend_id = new_friend_data_task_result[1]
+                new_friend_data = new_friend_data_task_result[0]
+
+                if "friends" in new_friend_data.keys():
+                    new_friend_friends = new_friend_data["friends"]
+                else:
+                    new_friend_friends = []
+
+                new_friend_friends.append(my_nick)
+
                 if "friends" in dataM.user.keys():
                     friends = dataM.user["friends"]
                 else:
                     friends = []
-                friends.append(dataM.user["requests"][int(new_friend)])
+
+                friends.append(new_friend_nick)
                 dataM.db.child("users").child(dataM.user_id).update({"friends": friends})
+                dataM.db.child("users").child(new_friend_id).update({"friends": new_friend_friends})
                 del dataM.user["requests"][int(new_friend)]
                 dataM.db.child("users").child(dataM.user_id).update({"requests": dataM.user["requests"]})
+                await dataM.refresh_data()
 
+#add to remove friend so that friend will also be reomved from the other user
 def run_remove_friend():
+    """
+
+    :return:
+    """
     if "friends" in dataM.user.keys():
         index = 0
         for friend in dataM.user["friends"]:
