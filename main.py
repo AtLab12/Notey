@@ -41,7 +41,6 @@ async def runNotey():
             if email != '':
                 getUserTask = dataF.getUserdata(email)
                 dataM.user = await getUserTask
-                print(dataM.user)
                 await runMain()
         elif choice == 3:
             pasResettask = asyncio.create_task(authC.passwordReset())
@@ -82,7 +81,7 @@ async def runMain():
         if choice == 2:
             pass
         if choice == 3:
-            pass
+            dataM.showProfileDetails()
         if choice == 4:
             dataM.user = {}
             break

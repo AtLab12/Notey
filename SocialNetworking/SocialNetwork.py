@@ -3,4 +3,14 @@ import pyrebase
 
 # search friends
 
-# add friend
+# send request
+
+async def checkIfUserExists(nick: str):
+    """
+
+    :param nick:
+    
+    :return:
+    Bool stating weather user with provided nick name exists
+    """
+    pass

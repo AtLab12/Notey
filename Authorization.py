@@ -72,6 +72,7 @@ async def login():
 
     #email = input("Please provide email: ")
     email = "259431@student.pwr.edu.pl"
+
     if email == "back":
         return
 
@@ -161,7 +162,7 @@ def validateEmail(email: str):
     String representing users email address
     :return:
     """
-    regex = '^(.*?)@(.*?)(pl)' # dodac pwr.edu.pl
+    regex = '^(.*?)@(.*?)' # dodac (pwr.edu.pl) po (.*?)
     if email != None:
         if re.match(regex, email):
             return True

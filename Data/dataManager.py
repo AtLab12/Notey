@@ -10,8 +10,8 @@ def showProfileDetails():
     :return:
     """
     if user != {}:
-        print("Nickname: ", user["nick"])
+        print("\nNickname: ", user["nick"])
         print("Name: ", user["name"])
-        print("Lastname: ", user["lastName"])
+        print("Lastname: ", user["lastName"], "\n")
     else:
         print("\n Unexpected error occured \n")
