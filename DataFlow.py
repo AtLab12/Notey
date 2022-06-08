@@ -8,8 +8,9 @@ import Authorization as au
 async def getUserdata(email):
     loop = asyncio.get_event_loop()
     userDataTask = loop.run_in_executor(None, getUserCall, email)
-    await userDataTask
-    return userDataTask.result()
+    result = await userDataTask
+    id = next(iter((result.val().keys())))
+    return result.val().get(id)
 
 def getUserCall(email):
     try:

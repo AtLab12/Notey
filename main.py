@@ -1,6 +1,9 @@
 import asyncio
 import Authorization as authC
 import DataFlow as dataF
+from SocialNetworking import SocialNetworkMenus as socialNMenus
+import MenusUtility.MenuUtility as mUtility
+import Data.dataManager as dataM
 
 def printMenu():
     menu = {
@@ -23,7 +26,7 @@ async def runNotey():
     print("Welcome to Notey!")
 
     printMenu()
-    choice = handleSelection()
+    choice = mUtility.handleSelection()
 
     while True:
         if choice == 1:
@@ -37,7 +40,8 @@ async def runNotey():
             email = loginTask.result()['email']
             if email != '':
                 getUserTask = dataF.getUserdata(email)
-                await getUserTask
+                dataM.user = await getUserTask
+                print(dataM.user)
                 await runMain()
         elif choice == 3:
             pasResettask = asyncio.create_task(authC.passwordReset())
@@ -48,7 +52,7 @@ async def runNotey():
             print("Invalid selection. Please try again.")
 
         printMenu()
-        choice = handleSelection()
+        choice = mUtility.handleSelection()
 
 
 def printMainMenu():
@@ -70,26 +74,21 @@ async def runMain():
     """
     print("Please select one of the following options: ")
     printMainMenu()
-    choice = handleSelection()
+    choice = mUtility.handleSelection()
 
     while True:
         if choice == 1:
-            pass
+            await socialNMenus.runFriends()
         if choice == 2:
             pass
+        if choice == 3:
+            pass
+        if choice == 4:
+            dataM.user = {}
+            break
         printMainMenu()
-        choice = handleSelection()
+        choice = mUtility.handleSelection()
 
-def handleSelection():
-    """
-    Method protects program from invalid input
-    :return:
-    """
-    selection = input("Please type your selection: ")
-    while not selection.isdigit():
-        print("\n Invalid input \n")
-        selection = input("Please type your selection: ")
 
-    return int(selection)
 
 asyncio.run(runNotey())
