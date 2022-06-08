@@ -15,5 +15,8 @@ def getUserCall(email):
     try:
         user = au.db.child("users").order_by_child("email").equal_to(email).get()
         return user
-    except:
-        raise
+    except requests.exceptions.HTTPError as e:
+        error_json = e.args[1]
+        errorMessage = json.loads(error_json)['error']['message']
+        print(errorMessage)
+        return
