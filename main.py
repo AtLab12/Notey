@@ -54,7 +54,9 @@ async def runNotey():
 def printMainMenu():
     menu = {
         1: 'Friends',
-        2: 'Notes'
+        2: 'Notes',
+        3: 'View profile details',
+        4: 'Logout'
     }
     for key in menu.keys():
         print(key, menu[key])
