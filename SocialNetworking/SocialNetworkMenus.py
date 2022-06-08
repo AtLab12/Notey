@@ -3,6 +3,7 @@ import MenusUtility.MenuUtility as mUtility
 import Data.dataManager as dataM
 import SocialNetworking.SocialNetwork as socialNet
 
+
 def print_friend_menu():
     menu = {
         1: "See your friends",
@@ -19,7 +20,7 @@ def print_friend_menu():
 
 async def run_friends():
     """
-    Presents frinds section menu
+    Presents friends section menu
     :return:
     """
     print("Please select one of the following options: ")
@@ -28,18 +29,23 @@ async def run_friends():
 
     while True:
         if choice == 1:
-            pass
+            if "friends" in dataM.user.keys():
+                print("Your friends: ")
+                for friend in dataM.user["friends"]:
+                    print(friend)
+            else:
+                print("Currently you don't have any friends")
         if choice == 2:
-            pass
+            await socialNet.handle_myrequests()
         if choice == 3:
             print("\n Please provide your friend nickname: ")
             nick = input("Type here: ")
-            request_task = socialNet.checkIfUserExists(nick)
+            request_task = socialNet.send_request(nick)
             await request_task
         if choice == 4:
-            pass
+            socialNet.run_remove_friend()
         if choice == 5:
-            pass
+            break
 
         print_friend_menu()
         choice = mUtility.handle_selection()

@@ -6,7 +6,7 @@ import asyncio
 import Data.dataManager as dataM
 
 
-async def signUp():
+async def sign_up():
     """
     Method handles the whole sign up process
     Creates auth object used later to authenticate using email and password
@@ -35,8 +35,8 @@ async def signUp():
     while not email_cloud_validated:
         try:
             loop = asyncio.get_event_loop()
-            userTask = loop.run_in_executor(None, dataM.auth.create_user_with_email_and_password, email, password)
-            await userTask
+            user_task = loop.run_in_executor(None, dataM.auth.create_user_with_email_and_password, email, password)
+            await user_task
             email_cloud_validated = True
         except requests.exceptions.HTTPError as e:
             error_json = e.args[1]
@@ -48,7 +48,7 @@ async def signUp():
 
     data_task_creation = asyncio.create_task(create_user_details(email))
     await data_task_creation
-    return userTask.result()["email"]
+    return user_task.result()["email"]
 
 
 async def login():
@@ -57,8 +57,8 @@ async def login():
     :return:
     """
 
-    # email = input("Please provide email: ")
-    email = "259431@student.pwr.edu.pl"
+    email = input("Please provide email: ")
+    #email = "259431@student.pwr.edu.pl"
 
     if email == "back":
         return

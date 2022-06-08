@@ -18,8 +18,6 @@ def print_menu():
     print('\n')
 
 
-#       259431@student.pwr.edu.pl
-
 async def run_notey():
     """
     Method enables login or registration.
@@ -32,7 +30,7 @@ async def run_notey():
 
     while True:
         if choice == 1:
-            registration_task = asyncio.create_task(authC.signUp())
+            registration_task = asyncio.create_task(authC.sign_up())
             await registration_task
             if registration_task.result() == '':
                 print("Registration unsuccessful. Please try again")
@@ -42,7 +40,9 @@ async def run_notey():
             email = login_task.result()['email']
             if email != '':
                 get_user_task = dataF.getUserdata(email)
-                dataM.user = await get_user_task
+                result = await get_user_task
+                dataM.user = result[0]
+                dataM.user_id = result[1]
                 await run_main()
         elif choice == 3:
             pasResettask = asyncio.create_task(authC.password_reset())

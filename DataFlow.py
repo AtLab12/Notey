@@ -13,7 +13,7 @@ async def getUserdata(email: str):
     userDataTask = loop.run_in_executor(None, getUserCall, email)
     result = await userDataTask
     id = next(iter((result.val().keys())))
-    return result.val().get(id)
+    return result.val().get(id), id
 
 def getUserCall(email: str):
     try:

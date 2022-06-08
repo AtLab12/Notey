@@ -4,6 +4,8 @@ import pyrebase
 import json
 
 user = {}
+user_id: str = None
+
 firebaseConfig = {
     'apiKey': "AIzaSyCkXdB3mIonc9F6Ic9D_0rDYc2HLInuxdc",
     'authDomain': "notey-ee724.firebaseapp.com",
@@ -13,8 +15,7 @@ firebaseConfig = {
     'messagingSenderId': "161243066116",
     'appId': "1:161243066116:web:d19d76f55139e0c50f2a51",
     'measurementId': "G-73LBDN21LX"
-};
-
+}
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 db = firebase.database()
@@ -33,25 +34,23 @@ def show_profile_details():
         print("\n Unexpected error occured \n")
 
 
-async def check_if_user_exists(nick: str):
+async def get_user(nick: str):
     """
     Checks if there is a user with provided nickname in the database
     :param nick:
     Users of interest nickname
     :return:
-    Touple with fields representing:
-    1. Bool stating weather user with provided nickname exists
-    2. If user exists then his id
+    If user exists then his id if not None
     """
     loop = asyncio.get_event_loop()
     check_task = loop.run_in_executor(None, get_user_by_nick_call, nick)
     result = await check_task
     if not result.val():
         print("User with this nick name does not exist\n")
-        return False, None
+        return None
     else:
         id = next(iter((result.val().keys())))
-        return True, id
+        return result.val().get(id), id
 
 
 def get_user_by_nick_call(nick: str):
@@ -63,3 +62,5 @@ def get_user_by_nick_call(nick: str):
         error_message = json.loads(error_json)['error']['message']
         print(error_message)
         return
+
+#get friends
