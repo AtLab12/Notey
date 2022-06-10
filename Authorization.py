@@ -1,5 +1,4 @@
 import json
-import pyrebase
 import re
 import requests
 import asyncio
@@ -67,8 +66,8 @@ async def login():
         print("\n !!! Invalid email provided, please try again !!! \n")
         email = input("Please provide email: ")
 
-    # password = input("Please provide password: ")
-    password = "12345678"
+    password = input("Please provide password: ")
+    #password = "12345678"
 
     try:
         loop = asyncio.get_event_loop()

@@ -2,6 +2,9 @@ import asyncio
 import requests
 import pyrebase
 import json
+#wydzielić kod na klasy żeby to poukładać
+#jest dobra szansa na 4 bo projekt idzie w dobrym kierunku
+#skupić się na funkcjonalnościach nie na GUI
 
 user = {}
 user_id: str = None
@@ -29,7 +32,7 @@ def show_profile_details():
     if user != {}:
         print("\nNickname: ", user["nick"])
         print("Name: ", user["name"])
-        print("Lastname: ", user["lastName"], "\n")
+        print("Lastname: ", user["last_name"], "\n")
     else:
         print("\n Unexpected error occured \n")
 

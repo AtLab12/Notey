@@ -3,19 +3,19 @@ import requests
 import asyncio
 import Data.dataManager as dataM
 
-async def getUserdata(email: str):
+async def get_user_data(email: str):
     """
     Downloads users data.
     :param email:
     :return:
     """
     loop = asyncio.get_event_loop()
-    userDataTask = loop.run_in_executor(None, getUserCall, email)
+    userDataTask = loop.run_in_executor(None, get_user_call, email)
     result = await userDataTask
     id = next(iter((result.val().keys())))
     return result.val().get(id), id
 
-def getUserCall(email: str):
+def get_user_call(email: str):
     try:
         user = dataM.db.child("users").order_by_child("email").equal_to(email).get()
         return user

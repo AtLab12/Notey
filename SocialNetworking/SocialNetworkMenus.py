@@ -43,7 +43,7 @@ async def run_friends():
             request_task = socialNet.send_request(nick)
             await request_task
         if choice == 4:
-            socialNet.run_remove_friend()
+            await socialNet.run_remove_friend()
         if choice == 5:
             break
 

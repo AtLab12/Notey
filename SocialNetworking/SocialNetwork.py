@@ -1,14 +1,6 @@
 import asyncio
-import Authorization as au
-import requests
-import json
 import Data.dataManager as dataM
 import DataFlow as dataF
-import pyrebase
-
-# search friends
-
-# send request
 
 async def send_request(nick: str):
     """
@@ -18,11 +10,15 @@ async def send_request(nick: str):
     :param nick:
     :return:
     """
+    if nick == dataM.user["nick"]:
+        print("You can't add yourself as friend silly ;)")
+        return
+
     loop = asyncio.get_event_loop()
     check_task = dataM.get_user(nick)
     user_data = await check_task
 
-    if user_data[0] is not None:
+    if user_data is not None:
 
         if "requests" in user_data[0]:
             req = user_data[0]["requests"]
@@ -44,7 +40,7 @@ async def handle_myrequests():
     Handles request acceptance for both users
     :return:
     """
-    task = dataF.getUserdata(dataM.user["email"])
+    task = dataF.get_user_data(dataM.user["email"])
     result = await task
     dataM.user = result[0]
     index = 0
@@ -95,10 +91,11 @@ async def handle_myrequests():
                 dataM.db.child("users").child(dataM.user_id).update({"requests": dataM.user["requests"]})
                 await dataM.refresh_data()
 
-#add to remove friend so that friend will also be reomved from the other user
-def run_remove_friend():
-    """
 
+async def run_remove_friend():
+    """
+    Deletes friend based on user selection.
+    Automatically deletes currenty logged in user from the currently beeing deleted friends list.
     :return:
     """
     if "friends" in dataM.user.keys():
@@ -109,8 +106,19 @@ def run_remove_friend():
         selection = input("Who do you want to remove? \n")
         if selection == "back": return
         if selection.isdigit() and int(selection) < index:
+            selected_friend_nick = dataM.user["friends"][int(selection)]
+            selected_friend_task = dataM.get_user(selected_friend_nick)
+            selected_friend_task_result = await selected_friend_task
+
+            selected_friend_id = selected_friend_task_result[1]
+            selected_friend_data = selected_friend_task_result[0]
+
+            selected_friends = selected_friend_data["friends"]
+            selected_friends.remove(dataM.user["nick"])
+
             del dataM.user["friends"][int(selection)]
             dataM.db.child("users").child(dataM.user_id).update({"friends": dataM.user["friends"]})
+            dataM.db.child("users").child(selected_friend_id).update({"friends": selected_friends})
         else:
             print("Invalid input")
     else:
