@@ -75,7 +75,7 @@ async def handle_myrequests():
                 print("uups. I'm afraid you are not interesting enough to have ", new_friend, "new requests.\n")
             else:
                 new_friend_nick = dataM.user.data["requests"][int(new_friend)]
-                new_friend_data_task = dataM.user.get_user_by_nick(new_friend_nick)
+                new_friend_data_task = dataM.data_management.get_user_by_nick(new_friend_nick)
                 new_friend_data_task_result = await new_friend_data_task
                 new_friend_id = new_friend_data_task_result[1]
                 new_friend_data = new_friend_data_task_result[0]
@@ -87,17 +87,19 @@ async def handle_myrequests():
 
                 new_friend_friends.append(my_nick)
 
-                if "friends" in dataM.user.keys():
-                    friends = dataM.user["friends"]
+                if "friends" in dataM.user.data.keys():
+                    friends = dataM.user.data["friends"]
                 else:
                     friends = []
 
                 friends.append(new_friend_nick)
-                dataM.db.child("users").child(dataM.user.user_id).update({"friends": friends})
+                loc_id = dataM.user.user_id
+                dataM.db.child("users").child(loc_id).update({"friends": friends})
                 dataM.db.child("users").child(new_friend_id).update({"friends": new_friend_friends})
                 del dataM.user.data["requests"][int(new_friend)]
-                dataM.db.child("users").child(dataM.user.user_id).update({"requests": dataM.user["requests"]})
-                await dataM.refresh_data()
+                loc_req = dataM.user.data["requests"]
+                dataM.db.child("users").child(loc_id).update({"requests": loc_req})
+                await dataM.data_management.refresh_data()
 
 
 async def run_remove_friend():
@@ -106,26 +108,27 @@ async def run_remove_friend():
     Automatically deletes currenty logged in user from the currently beeing deleted friends list.
     :return:
     """
-    if "friends" in dataM.user.keys():
+    if "friends" in dataM.user.data.keys():
         index = 0
-        for friend in dataM.user["friends"]:
+        for friend in dataM.user.data["friends"]:
             print(index, ": ", friend)
             index += 1
         selection = input("Who do you want to remove? \n")
         if selection == "back": return
         if selection.isdigit() and int(selection) < index:
-            selected_friend_nick = dataM.user["friends"][int(selection)]
-            selected_friend_task = dataM.get_user(selected_friend_nick)
+            selected_friend_nick = dataM.user.data["friends"][int(selection)]
+            selected_friend_task = dataM.data_management.get_user_by_nick(selected_friend_nick)
             selected_friend_task_result = await selected_friend_task
 
             selected_friend_id = selected_friend_task_result[1]
             selected_friend_data = selected_friend_task_result[0]
 
             selected_friends = selected_friend_data["friends"]
-            selected_friends.remove(dataM.user["nick"])
+            selected_friends.remove(dataM.user.data["nick"])
 
-            del dataM.user["friends"][int(selection)]
-            dataM.db.child("users").child(dataM.user_id).update({"friends": dataM.user["friends"]})
+            del dataM.user.data["friends"][int(selection)]
+            loc_id = dataM.user.user_id
+            dataM.db.child("users").child(loc_id).update({"friends": dataM.user.data["friends"]})
             dataM.db.child("users").child(selected_friend_id).update({"friends": selected_friends})
         else:
             print("Invalid input")

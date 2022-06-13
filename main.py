@@ -36,9 +36,9 @@ async def run_notey():
         elif choice == 2:
             login_task = asyncio.create_task(authC.login())
             await login_task
-            # refactor error handeling
-            email = login_task.result()['email']
-            if email != '':
+            result = login_task.result()
+            if result is not None:
+                email = result['email']
                 get_user_task = dataM.data_management.get_user_by_email(email)
                 result = await get_user_task
                 dataM.user.data = result[0]

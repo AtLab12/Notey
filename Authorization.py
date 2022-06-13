@@ -58,6 +58,7 @@ async def login():
 
     #email = input("Please provide email: ")
     email = "259431@student.pwr.edu.pl"
+    #email = "mikolaj.adawaz@gmail.com"
 
     if email == "back":
         return

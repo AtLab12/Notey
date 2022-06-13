@@ -63,14 +63,15 @@ class UserDataManagement:
 
     async def refresh_data(self):
         global user
-        task = self.get_user_by_nick(user["nick"])
+        loc_nick = user.data["nick"]
+        task = self.get_user_by_nick(loc_nick)
         result = await task
         user = result[0]
 
     def get_user_by_nick_call(self, nick: str):
         try:
-            user = db.child("users").order_by_child("nick").equal_to(nick).get()
-            return user
+            loc_user = db.child("users").order_by_child("nick").equal_to(nick).get()
+            return loc_user
         except requests.exceptions.HTTPError as e:
             error_json = e.args[1]
             error_message = json.loads(error_json)['error']['message']
