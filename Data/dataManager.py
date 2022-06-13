@@ -43,6 +43,8 @@ class User:
 
 
 class UserDataManagement:
+
+
     async def get_user_by_nick(self, nick: str):
         """
         Checks if there is a user with provided nickname in the database
@@ -94,6 +96,25 @@ class UserDataManagement:
         try:
             user_loc = db.child("users").order_by_child("email").equal_to(email).get()
             return user_loc
+        except requests.exceptions.HTTPError as e:
+            error_json = e.args[1]
+            error_message = json.loads(error_json)['error']['message']
+            print(error_message)
+            return
+
+    async def get_all_users(self):
+        nicks = []
+        loop = asyncio.get_event_loop()
+        get_all_users_task = loop.run_in_executor(None, self.get_all_users_call)
+        result = await get_all_users_task
+        for value in result.val().values():
+            nicks.append(value['nick'])
+        return nicks
+
+    def get_all_users_call(self):
+        try:
+            users = db.child("users").get()
+            return users
         except requests.exceptions.HTTPError as e:
             error_json = e.args[1]
             error_message = json.loads(error_json)['error']['message']

@@ -4,6 +4,8 @@ from SocialNetworking import SocialNetworkMenus as socialNMenus
 import MenusUtility.MenuUtility as mUtility
 import Data.dataManager as dataM
 
+auth = authC.Authorization()
+
 
 def print_menu():
     menu = {
@@ -29,12 +31,12 @@ async def run_notey():
 
     while True:
         if choice == 1:
-            registration_task = asyncio.create_task(authC.sign_up())
+            registration_task = asyncio.create_task(auth.sign_up())
             await registration_task
             if registration_task.result() == '':
                 print("Registration unsuccessful. Please try again")
         elif choice == 2:
-            login_task = asyncio.create_task(authC.login())
+            login_task = asyncio.create_task(auth.login())
             await login_task
             result = login_task.result()
             if result is not None:
@@ -45,7 +47,7 @@ async def run_notey():
                 dataM.user.user_id = result[1]
                 await run_main()
         elif choice == 3:
-            pas_reset_task = asyncio.create_task(authC.password_reset())
+            pas_reset_task = asyncio.create_task(auth.password_reset())
             await pas_reset_task
         elif choice == 4:
             break
