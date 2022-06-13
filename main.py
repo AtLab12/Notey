@@ -1,6 +1,5 @@
 import asyncio
 import Authorization as authC
-import DataFlow as dataF
 from SocialNetworking import SocialNetworkMenus as socialNMenus
 import MenusUtility.MenuUtility as mUtility
 import Data.dataManager as dataM
@@ -40,14 +39,14 @@ async def run_notey():
             # refactor error handeling
             email = login_task.result()['email']
             if email != '':
-                get_user_task = dataF.get_user_data(email)
+                get_user_task = dataM.data_management.get_user_by_email(email)
                 result = await get_user_task
-                dataM.user = result[0]
-                dataM.user_id = result[1]
+                dataM.user.data = result[0]
+                dataM.user.user_id = result[1]
                 await run_main()
         elif choice == 3:
-            pasResettask = asyncio.create_task(authC.password_reset())
-            await pasResettask
+            pas_reset_task = asyncio.create_task(authC.password_reset())
+            await pas_reset_task
         elif choice == 4:
             break
         else:
@@ -85,9 +84,9 @@ async def run_main():
         if choice == 2:
             pass
         if choice == 3:
-            dataM.show_profile_details()
+            dataM.user.show_profile_details()
         if choice == 4:
-            dataM.user = {}
+            dataM.user.data = {}
             break
         print_main_menu()
         choice = mUtility.handle_selection()

@@ -56,8 +56,8 @@ async def login():
     :return:
     """
 
-    email = input("Please provide email: ")
-    #email = "259431@student.pwr.edu.pl"
+    #email = input("Please provide email: ")
+    email = "259431@student.pwr.edu.pl"
 
     if email == "back":
         return
@@ -66,8 +66,9 @@ async def login():
         print("\n !!! Invalid email provided, please try again !!! \n")
         email = input("Please provide email: ")
 
-    password = input("Please provide password: ")
+    #password = input("Please provide password: ")
     #password = "12345678"
+    password = "87654321"
 
     try:
         loop = asyncio.get_event_loop()

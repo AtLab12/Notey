@@ -29,9 +29,9 @@ async def run_friends():
 
     while True:
         if choice == 1:
-            if "friends" in dataM.user.keys():
+            if "friends" in dataM.user.data.keys():
                 print("Your friends: ")
-                for friend in dataM.user["friends"]:
+                for friend in dataM.user.data["friends"]:
                     print(friend)
             else:
                 print("Currently you don't have any friends")

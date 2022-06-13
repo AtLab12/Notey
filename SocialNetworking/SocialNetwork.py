@@ -1,6 +1,6 @@
 import asyncio
 import Data.dataManager as dataM
-import DataFlow as dataF
+import MenusUtility.MenuUtility as m_utility
 
 async def send_request(nick: str):
     """
@@ -10,28 +10,36 @@ async def send_request(nick: str):
     :param nick:
     :return:
     """
-    if nick == dataM.user["nick"]:
+    if nick == dataM.user.data["nick"]:
         print("You can't add yourself as friend silly ;)")
         return
 
     loop = asyncio.get_event_loop()
-    check_task = dataM.get_user(nick)
+    check_task = dataM.data_management.get_user_by_nick(nick)
     user_data = await check_task
 
     if user_data is not None:
-
         if "requests" in user_data[0]:
             req = user_data[0]["requests"]
         else:
             req = []
 
-        my_nick = dataM.user["nick"]
+        my_nick = dataM.user.data["nick"]
         if my_nick not in req:
-            req.append(dataM.user["nick"])
+            req.append(dataM.user.data["nick"])
             dataM.db.child("users").child(user_data[1]).update({"requests": req})
             print("Requests sent")
         else:
             print("You already sent request to this user")
+    else:
+        # make request to get all users
+        # check if any of the have acceptable modyfication dystans
+        # if not don't show anything
+        # if yes present and give option to opt out
+        # end
+        print("Did you mean to send request to one of these users? \n")
+        m_utility.handle_selection()
+
 
 async def handle_myrequests():
     """
@@ -40,14 +48,14 @@ async def handle_myrequests():
     Handles request acceptance for both users
     :return:
     """
-    task = dataF.get_user_data(dataM.user["email"])
+    task = dataM.data_management.get_user_by_email(dataM.user.data["email"])
     result = await task
-    dataM.user = result[0]
+    dataM.user.data = result[0]
     index = 0
-    my_nick = dataM.user["nick"]
-    if "requests" in list(dataM.user.keys()):
+    my_nick = dataM.user.data["nick"]
+    if "requests" in list(dataM.user.data.keys()):
         print("\nPeople who want to be your friends: ")
-        for req_nick in dataM.user["requests"]:
+        for req_nick in dataM.user.data["requests"]:
             print(index, ": ", req_nick)
             index += 1
     else:
@@ -66,8 +74,8 @@ async def handle_myrequests():
             if int(new_friend) >= index:
                 print("uups. I'm afraid you are not interesting enough to have ", new_friend, "new requests.\n")
             else:
-                new_friend_nick = dataM.user["requests"][int(new_friend)]
-                new_friend_data_task = dataM.get_user(new_friend_nick)
+                new_friend_nick = dataM.user.data["requests"][int(new_friend)]
+                new_friend_data_task = dataM.user.get_user_by_nick(new_friend_nick)
                 new_friend_data_task_result = await new_friend_data_task
                 new_friend_id = new_friend_data_task_result[1]
                 new_friend_data = new_friend_data_task_result[0]
@@ -85,10 +93,10 @@ async def handle_myrequests():
                     friends = []
 
                 friends.append(new_friend_nick)
-                dataM.db.child("users").child(dataM.user_id).update({"friends": friends})
+                dataM.db.child("users").child(dataM.user.user_id).update({"friends": friends})
                 dataM.db.child("users").child(new_friend_id).update({"friends": new_friend_friends})
-                del dataM.user["requests"][int(new_friend)]
-                dataM.db.child("users").child(dataM.user_id).update({"requests": dataM.user["requests"]})
+                del dataM.user.data["requests"][int(new_friend)]
+                dataM.db.child("users").child(dataM.user.user_id).update({"requests": dataM.user["requests"]})
                 await dataM.refresh_data()
 
 
