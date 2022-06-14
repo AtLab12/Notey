@@ -12,6 +12,7 @@ class User:
     def __init__(self):
         self.__data = {}
         self.__user_id: str = None
+        self.__token: str = None
 
     @property
     def data(self):
@@ -28,6 +29,14 @@ class User:
     @user_id.setter
     def user_id(self, id: str):
         self.__user_id = id
+
+    @property
+    def token(self):
+        return self.__token
+
+    @token.setter
+    def token(self, token: str):
+        self.__token = token
 
     def show_profile_details(self):
         """
@@ -63,13 +72,6 @@ class UserDataManagement:
             id = next(iter((result.val().keys())))
             return result.val().get(id), id
 
-    async def refresh_data(self):
-        global user
-        loc_nick = user.data["nick"]
-        task = self.get_user_by_nick(loc_nick)
-        result = await task
-        user = result[0]
-
     def get_user_by_nick_call(self, nick: str):
         try:
             loc_user = db.child("users").order_by_child("nick").equal_to(nick).get()
@@ -80,6 +82,13 @@ class UserDataManagement:
             print(error_message)
             return
 
+    async def refresh_data(self):
+        global user
+        loc_nick = user.data["nick"]
+        task = self.get_user_by_nick(loc_nick)
+        result = await task
+        user = result[0]
+
     async def get_user_by_email(self, email: str):
         """
         Downloads users data.
@@ -87,8 +96,8 @@ class UserDataManagement:
         :return:
         """
         loop = asyncio.get_event_loop()
-        userDataTask = loop.run_in_executor(None, self.get_user_call, email)
-        result = await userDataTask
+        user_data_task = loop.run_in_executor(None, self.get_user_call, email)
+        result = await user_data_task
         id = next(iter((result.val().keys())))
         return result.val().get(id), id
 

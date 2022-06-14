@@ -1,4 +1,3 @@
-import asyncio
 import MenusUtility.MenuUtility as mUtility
 import Data.dataManager as dataM
 import SocialNetworking.SocialNetwork as socialNet

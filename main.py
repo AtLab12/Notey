@@ -1,6 +1,7 @@
 import asyncio
 import Authorization as authC
 from SocialNetworking import SocialNetworkMenus as socialNMenus
+from Notes import NotesMenus as noteMenu
 import MenusUtility.MenuUtility as mUtility
 import Data.dataManager as dataM
 
@@ -41,6 +42,7 @@ async def run_notey():
             result = login_task.result()
             if result is not None:
                 email = result['email']
+                dataM.user.token = result['idToken']
                 get_user_task = dataM.data_management.get_user_by_email(email)
                 result = await get_user_task
                 dataM.user.data = result[0]
@@ -84,7 +86,7 @@ async def run_main():
         if choice == 1:
             await socialNMenus.run_friends()
         if choice == 2:
-            pass
+            await noteMenu.run_notes()
         if choice == 3:
             dataM.user.show_profile_details()
         if choice == 4:

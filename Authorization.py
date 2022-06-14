@@ -24,7 +24,7 @@ class Authorization:
             print("\n !!! Invalid email provided, please try again !!! \n")
             email = input("Please provide email: ")
 
-        password = input("Pleas provide password: ")
+        password = input("Please provide password: ")
         password_validation = input("Pleas provide password again: ")
 
         while password != password_validation or len(password) < 8:
@@ -101,11 +101,13 @@ class Authorization:
 
         name = input("Please provide your name: ")
         last_name = input("Please provide your last name: ")
+        path = input("Pleas eprovide path to folder where you will save your notes: ")
         data = {
             "nick": nick,
             "name": name,
             "last_name": last_name,
-            "email": email
+            "email": email,
+            "path": path
         }
         try:
             dataM.db.child("users").push(data)
