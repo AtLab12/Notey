@@ -3,8 +3,6 @@ from Notes import NotesManager as notesM
 from Notes import NotesConfigManager as notesConfM
 import Data.dataManager as dataM
 
-notes_manager = notesM.NotesManager()
-
 
 def print_main_notes_menu():
     menu = {
@@ -27,16 +25,16 @@ async def run_notes():
 
     while True:
         if choice == 1:
-            notes = await notes_manager.get_notes_for_user_with_nick(dataM.user.data["nick"])
+            notes = await notesM.notes_manager.get_notes_for_user_with_nick(dataM.user.data["nick"])
             if len(notes) == 0:
                 print("You don't have any notes yet")
             else:
                 for note in notes:
                     print(note[1]["name"])
         if choice == 2:
-            await notes_manager.createNote()
+            await notesM.notes_manager.createNote()
         if choice == 3:
-            await notes_manager.remove_note()
+            await notesM.notes_manager.remove_note()
         if choice == 4:
             await run_select_note()
         if choice == 5:
@@ -71,7 +69,7 @@ async def run_select_note():
     :return:
     """
     # getting all users notes
-    notes = await notes_manager.get_notes_for_user_with_nick(dataM.user.data["nick"])
+    notes = await notesM.notes_manager.get_notes_for_user_with_nick(dataM.user.data["nick"])
 
     if len(notes) == 0:
         print("You don't have any notes. Please create one to proceed")
@@ -101,9 +99,9 @@ async def run_select_note():
         if choice == 1:
             await notes_config_manager.download_note()
         if choice == 2:
-            pass
+            await notes_config_manager.save_note()
         if choice == 3:
-            pass
+            await notes_config_manager.add_friend_to_note()
         if choice == 4:
             pass
         if choice == 5:

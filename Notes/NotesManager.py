@@ -8,7 +8,6 @@ import os
 
 storage = dataM.firebase.storage()
 
-
 class NotesManager:
     async def createNote(self):
         """
@@ -18,12 +17,14 @@ class NotesManager:
         :return:
         """
         name = input("How do you want to name your file? : ")
+        name = name + "_v1"
         validation_task = await self.get_note_by_name(str(name))
 
         #checking if note with provided name already exists
         while validation_task is not None:
             print("\n !!Note with this name already exists!! \n")
             name = input("How do you want to name your file? : ")
+            name = name + "_v1"
             validation_task = await self.get_note_by_name(name)
             if name == "back":
                 return
@@ -109,7 +110,7 @@ class NotesManager:
             error_message = json.loads(error_json)['error']['message']
             print(error_message)
 
-    async def remove_note(self):
+    async def remove_note(self): #### handel all archive files also #####
         """
         enables user to remove note with specific name
         :return:
@@ -137,3 +138,5 @@ class NotesManager:
             #deleting local copy
             file_path = dataM.user.data["path"]+ "/" + notes[choice][1]["name"] + ".txt"
             os.remove(file_path)
+
+notes_manager = NotesManager()

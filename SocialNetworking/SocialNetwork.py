@@ -94,6 +94,7 @@ class SocialNetwork:
                     new_friend_nick = dataM.user.data["requests"][int(new_friend)]
                     new_friend_data_task = dataM.data_management.get_user_by_nick(new_friend_nick)
                     new_friend_data_task_result = await new_friend_data_task
+
                     new_friend_id = new_friend_data_task_result[1]
                     new_friend_data = new_friend_data_task_result[0]
 

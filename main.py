@@ -90,7 +90,7 @@ async def run_main():
         if choice == 3:
             dataM.user.show_profile_details()
         if choice == 4:
-            dataM.user.data = {}
+            dataM.user.data = None
             break
         print_main_menu()
         choice = mUtility.handle_selection()
