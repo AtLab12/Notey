@@ -4,10 +4,6 @@ import pyrebase
 import json
 
 
-# wydzielić kod na klasy żeby to poukładać
-# jest dobra szansa na 4 bo projekt idzie w dobrym kierunku
-# skupić się na funkcjonalnościach nie na GUI
-
 class User:
     def __init__(self):
         self.__data = {}
@@ -103,7 +99,10 @@ class UserDataManagement:
 
     def get_user_call(self, email: str):
         try:
-            user_loc = db.child("users").order_by_child("email").equal_to(email).get()
+            user_loc = db\
+                .child("users")\
+                .order_by_child("email")\
+                .equal_to(email).get()
             return user_loc
         except requests.exceptions.HTTPError as e:
             error_json = e.args[1]

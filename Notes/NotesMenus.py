@@ -1,8 +1,10 @@
 import MenusUtility.MenuUtility as mUtility
 from Notes import NotesManager as notesM
+from Notes import NotesConfigManager as notesConfM
 import Data.dataManager as dataM
 
 notes_manager = notesM.NotesManager()
+
 
 def print_main_notes_menu():
     menu = {
@@ -46,7 +48,7 @@ async def run_notes():
 
 def print_select_note_menu():
     menu = {
-        1: "Open note",
+        1: "Download note",
         2: "Save note",
         3: "Add friend to note",
         4: "Remove friend from note",
@@ -63,13 +65,41 @@ def print_select_note_menu():
 
 
 async def run_select_note():
-    print("Please select one of the following options: ")
+    """
+    Before function shows menu it checks if user has any existing notes.
+    Only if he does, will he be shown the config menu
+    :return:
+    """
+    # getting all users notes
+    notes = await notes_manager.get_notes_for_user_with_nick(dataM.user.data["nick"])
+
+    if len(notes) == 0:
+        print("You don't have any notes. Please create one to proceed")
+        return
+
+    print("Which note do you want to perform actions on?")
+    index = 0
+    for note in notes:
+        print(index, ": ", note[1]["name"])
+        index += 1
+    print("\n")
+    selected_note = mUtility.handle_selection()
+    # leaving config
+    if selected_note >= index:
+        return
+
+    selected_note_data = notes[selected_note][1]
+    selected_note_id = notes[selected_note][0]
+
+    notes_config_manager = notesConfM.NotesConfigManager(selected_note_id,selected_note_data)
+
+    print("(Selected: ", selected_note_data["name"], ")")
     print_select_note_menu()
     choice = mUtility.handle_selection()
 
     while True:
         if choice == 1:
-            await notes_manager.createNote()
+            await notes_config_manager.download_note()
         if choice == 2:
             pass
         if choice == 3:
@@ -87,5 +117,6 @@ async def run_select_note():
         if choice == 9:
             break
 
+        print("(Selected: ", selected_note_data["name"], ")")
         print_select_note_menu()
         choice = mUtility.handle_selection()

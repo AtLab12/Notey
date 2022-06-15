@@ -1,11 +1,10 @@
 import json
-import re
 import requests
 import asyncio
-import pyrebase
 import Data.dataManager as dataM
 from datetime import date
 import MenusUtility.MenuUtility as m_utility
+import os
 
 storage = dataM.firebase.storage()
 
@@ -14,7 +13,8 @@ class NotesManager:
     async def createNote(self):
         """
         method creates new note on local machine
-        sends start note to database and creates details
+        sends start note to database and creates note entity
+        removes local copy in order to force only one note source to exist
         :return:
         """
         name = input("How do you want to name your file? : ")
@@ -33,7 +33,7 @@ class NotesManager:
         with open(final_path, 'w') as f:
             f.write("This is your new note! ", )
 
-        #sending file to database
+        #sending file to database and creating note entity
         storage.child(name).put(final_path)
         link = storage.child(name).get_url(None)
         data = {
@@ -46,6 +46,10 @@ class NotesManager:
         }
 
         dataM.db.child("notes").push(data)
+
+        #removing local copy in order
+        os.remove(final_path)
+
 
     async def get_note_by_name(self, name: str):
         """
@@ -86,8 +90,9 @@ class NotesManager:
         call_task = loop.run_in_executor(None, self.__get_notes_by_nick, nick)
         result = await call_task
         notes = []
-        for item in result.val().items():
-            notes.append(item)
+        if len(result.val()) != 0:
+            for item in result.val().items():
+                notes.append(item)
         return notes
 
     def __get_notes_by_nick(self, nick: str):
@@ -126,5 +131,9 @@ class NotesManager:
         if choice >= index:
             return
         else:
+            #we delete both the file and the note entity
             storage.child(notes[choice][1]["name"]).delete(notes[choice][1]["name"], dataM.user.token)
             dataM.db.child("notes").child(notes[choice][0]).remove()
+            #deleting local copy
+            file_path = dataM.user.data["path"]+ "/" + notes[choice][1]["name"] + ".txt"
+            os.remove(file_path)
