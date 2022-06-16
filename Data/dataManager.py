@@ -46,6 +46,7 @@ class User:
         else:
             print("\n Unexpected error occured \n")
 
+user = User()
 
 class UserDataManagement:
 
@@ -79,11 +80,10 @@ class UserDataManagement:
             return
 
     async def refresh_data(self):
-        global user
         loc_nick = user.data["nick"]
         task = self.get_user_by_nick(loc_nick)
         result = await task
-        user = result[0]
+        user.data = result[0]
 
     async def get_user_by_email(self, email: str):
         """
@@ -143,5 +143,4 @@ firebaseConfig = {
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 db = firebase.database()
-user = User()
 data_management = UserDataManagement()

@@ -1,12 +1,11 @@
-import asyncio
-import requests
-import json
 import Data.dataManager as dataM
 import os
 import urllib
 from Notes import NotesManager as notesM
 import MenusUtility.MenuUtility as m_utility
-
+from fpdf import FPDF
+from gtts import gTTS
+import subprocess
 
 class NotesConfigManager:
 
@@ -62,8 +61,9 @@ class NotesConfigManager:
                 print("You can't edit this note. Please contact the author")
                 return
         else:
-            print("You can't edit this note. Please contact the author")
-            return
+            if self.note_data["author"] != dataM.user.data["nick"]:
+                print("You can't edit this note. Please contact the author")
+                return
 
         old_name = self.note_data["name"]
         new_data = self.__get_name_modyfied(old_name)
@@ -345,6 +345,12 @@ class NotesConfigManager:
         await self.update_remotes(old_name, new_name)
 
     def __get_name_modyfied(self, name):
+        """
+        :param name:
+        Name to be modified
+        :return:
+        Returns modified name of a note. Modification basically increases version number at the end.
+        """
         old_name = name
         name_components = old_name.split("_")
         version_components = name_components[1].split("v")
@@ -360,3 +366,42 @@ class NotesConfigManager:
         final_path = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
         if os.path.exists(final_path):
             os.remove(final_path)
+
+    def export_to_pdf(self):
+        """
+        If note is donloaded method exports text from note into new pdf file.
+        :return:
+        """
+        note_name = self.note_data["name"]
+        final_path = dataM.user.data['path'] + "/" + note_name + ".txt"
+        if not os.path.exists(final_path):
+            print("\nFirst you have to download the note!!\n")
+            return
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=15)
+        pdf.cell(200, 10, txt=note_name, ln=1, align='C')
+        f = open(final_path, "r")
+        for x in f:
+            pdf.cell(200, 10, txt = x, ln = 1, align = 'C')
+        pdf_path = dataM.user.data["path"] + "/" + note_name + ".pdf"
+        pdf.output(name=pdf_path, dest='F').encode('latin-1')
+
+    def read_note(self):
+        """
+        Method reads specified note
+        :return:
+        """
+        final_path = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
+        if not os.path.exists(final_path):
+            print("\nFirst you have to download the note!!\n")
+            return
+        file = open(final_path, "r")
+        text_to_read = file.read().replace("\n", " ")
+        result = gTTS(text=text_to_read, lang='en', slow=False)
+        result_path = dataM.user.data['path'] + "/" + self.note_data["name"] + ".mp3"
+        file.close()
+        result.save(result_path)
+
+        subprocess.call(["afplay", result_path])
+        os.remove(result_path)

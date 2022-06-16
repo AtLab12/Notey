@@ -56,9 +56,9 @@ class Authorization:
         :return:
         """
 
-        #email = input("Please provide email: ")
+        email = input("Please provide email: ")
         #email = "259431@student.pwr.edu.pl"
-        email = "mikolaj.adawaz@gmail.com"
+        #email = "mikolaj.adawaz@gmail.com"
 
         if email == "back":
             return

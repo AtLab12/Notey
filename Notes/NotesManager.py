@@ -127,7 +127,7 @@ class NotesManager:
             return
         else:
             for note in notes:
-                print(index, ": ", note[1]["name"])
+                print(index, ": ", note)
                 index += 1
 
         print("Which note do you want to remove? ")
@@ -137,10 +137,12 @@ class NotesManager:
             return
         else:
             #we delete both the file and the note entity
-            storage.child(notes[choice][1]["name"]).delete(notes[choice][1]["name"], dataM.user.token)
-            dataM.db.child("notes").child(notes[choice][0]).remove()
+            note_data = await self.get_note_by_name(notes[choice])
+            storage.child(notes[choice]).delete(notes[choice], dataM.user.token)
+            dataM.db.child("notes").child(note_data[1]).remove()
             #deleting local copy
-            file_path = dataM.user.data["path"]+ "/" + notes[choice][1]["name"] + ".txt"
-            os.remove(file_path)
+            file_path = dataM.user.data["path"] + "/" + notes[choice] + ".txt"
+            if os.path.exists(file_path):
+                os.remove(file_path)
 
 notes_manager = NotesManager()

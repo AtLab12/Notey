@@ -111,9 +111,9 @@ async def run_select_note():
         if choice == 6:
             await notes_config_manager.go_back_to_old_version()
         if choice == 7:
-            pass
+            notes_config_manager.export_to_pdf()
         if choice == 8:
-            pass
+            notes_config_manager.read_note()
         if choice == 9:
             notes_config_manager.prepare_to_go_back()
             break
