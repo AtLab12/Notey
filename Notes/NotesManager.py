@@ -93,7 +93,11 @@ class NotesManager:
         notes = []
         if len(result.val()) != 0:
             for item in result.val().items():
-                notes.append(item)
+                notes.append(item[1]["name"])
+        if dataM.user.data['nick'] == nick:
+            if "remotes" in dataM.user.data.keys():
+                for note in dataM.user.data["remotes"]:
+                    notes.append(note)
         return notes
 
     def __get_notes_by_nick(self, nick: str):

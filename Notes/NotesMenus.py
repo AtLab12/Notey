@@ -30,7 +30,7 @@ async def run_notes():
                 print("You don't have any notes yet")
             else:
                 for note in notes:
-                    print(note[1]["name"])
+                    print(note)
         if choice == 2:
             await notesM.notes_manager.createNote()
         if choice == 3:
@@ -78,7 +78,7 @@ async def run_select_note():
     print("Which note do you want to perform actions on?")
     index = 0
     for note in notes:
-        print(index, ": ", note[1]["name"])
+        print(index, ": ", note)
         index += 1
     print("\n")
     selected_note = mUtility.handle_selection()
@@ -86,8 +86,10 @@ async def run_select_note():
     if selected_note >= index:
         return
 
-    selected_note_data = notes[selected_note][1]
-    selected_note_id = notes[selected_note][0]
+    selected_note = await notesM.notes_manager.get_note_by_name(notes[selected_note])
+
+    selected_note_data = selected_note[0]
+    selected_note_id = selected_note[1]
 
     notes_config_manager = notesConfM.NotesConfigManager(selected_note_id,selected_note_data)
 
@@ -103,16 +105,17 @@ async def run_select_note():
         if choice == 3:
             await notes_config_manager.add_friend_to_note()
         if choice == 4:
-            pass
+            await notes_config_manager.remove_friend_from_note()
         if choice == 5:
-            pass
+            await notes_config_manager.change_friends_access()
         if choice == 6:
-            pass
+            await notes_config_manager.go_back_to_old_version()
         if choice == 7:
             pass
         if choice == 8:
             pass
         if choice == 9:
+            notes_config_manager.prepare_to_go_back()
             break
 
         print("(Selected: ", selected_note_data["name"], ")")
