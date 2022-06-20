@@ -8,20 +8,21 @@ import MenusUtility.MenuUtility as m_utility
 from fpdf import FPDF
 from gtts import gTTS
 import subprocess
+import sh
 
 
 class NotesConfigManager:
 
-    def __init__(self, note_id: str, note_data):
+    def __init__(self, note_id: str, note_data: dict[str, str]):
         self.__note_id: str = note_id
-        self.__note_data = note_data
+        self.__note_data: dict[str, str] = note_data
 
     @property
     def note_id(self):
         return self.__note_id
 
     @note_id.setter
-    def note_id(self, id):
+    def note_id(self, id: str):
         self.__note_id = id
 
     @property
@@ -29,26 +30,24 @@ class NotesConfigManager:
         return self.__note_data
 
     @note_data.setter
-    def note_data(self, data):
+    def note_data(self, data: dict[str, str]):
         self.__note_data = data
 
-    async def download_note(self):
+    async def download_note(self) -> None:
         """
-        Donwloads note using unique url to specific path
-        :return:
+        Downloads note using unique url to specific path
         """
         path = dataM.user.data["path"] + "/" + self.note_data["name"] + ".txt"
         await self.download_note_call(path)
 
-    async def download_note_call(self, path: str):
+    async def download_note_call(self, path: str) -> None:
         """
         Helper method for downloading data
         :param path:
-        :return:
+        Path to which the file is supposed to be downloaded
         """
         url = self.note_data["link"]
         try:
-            # print(url)
             urllib.request.urlretrieve(url, path)
         except requests.exceptions.HTTPError as e:
             error_json = e.args[1]
@@ -56,12 +55,12 @@ class NotesConfigManager:
             print(error_message)
             return
 
-    async def save_note(self):
+    async def save_note(self) -> None:
         """
         Handles all actions connected to saving note as new version
-        :return:
         """
 
+        # checks if logged-in user can edit chosen note
         if "write_list" in self.note_data.keys():
             if self.note_data["author"] != dataM.user.data["nick"] \
                     and dataM.user.data["nick"] not in self.note_data["write_list"]:
@@ -71,8 +70,6 @@ class NotesConfigManager:
             if self.note_data["author"] != dataM.user.data["nick"]:
                 print("You can't edit this note. Please contact the author")
                 return
-
-        print("test if here")
 
         old_name = self.note_data["name"]
         new_data = self.__get_name_modyfied(old_name)
@@ -108,23 +105,22 @@ class NotesConfigManager:
         await self.refresh_local_data_with_name(new_name)
         await self.update_remotes(old_name, new_name)
 
-    async def refresh_local_data_with_name(self, name: str):
+    async def refresh_local_data_with_name(self, name: str) -> None:
         """
         Refreshing local note data
         :param name:
-        :return:
+        Name of the note
         """
         new_note_data = await notesM.notes_manager.get_note_by_name(name)
         self.note_data = new_note_data[0]
 
-    async def update_remotes(self, old_name: str, new_name: str):
+    async def update_remotes(self, old_name: str, new_name: str) -> None:
         """
-        Updating all occurances of edited note in users remotes
+        Updating all occurrences of edited note in users remotes
         :param old_name:
         Old note name
         :param new_name:
         Notes name after edit
-        :return:
         """
         result = dataM.db.child("users").get()
 
@@ -137,10 +133,9 @@ class NotesConfigManager:
                     remotes.append(new_name)
                     dataM.db.child("users").child(key).update({"remotes": remotes})
 
-    async def add_friend_to_note(self):
+    async def add_friend_to_note(self) -> None:
         """
         Lets user add a friend to note so that friend can also edit notes
-        :return:
         """
 
         if self.note_data["author"] != dataM.user.data["nick"]:
@@ -173,6 +168,7 @@ class NotesConfigManager:
                 print("This user already has access")
                 return
 
+            # get new users data
             new_user_data_task = dataM.data_management.get_user_by_nick(dataM.user.data["friends"][choice])
             new_user_data_task_result = await new_user_data_task
             new_user_id = new_user_data_task_result[1]
@@ -196,11 +192,11 @@ class NotesConfigManager:
             # refresh local data
             await self.refresh_local_data_with_name(self.note_data["name"])
 
-    async def remove_friend_from_note(self):
+    async def remove_friend_from_note(self) -> None:
         """
-        Method revokes certain friends access to either read or write note
-        :return:
+        Method revokes certain friends access to both read and write to note
         """
+        # checking if user wanting to make notifications is the author
         if self.note_data["author"] != dataM.user.data["nick"]:
             print("\n Only author can perform this action \n")
             return
@@ -252,15 +248,16 @@ class NotesConfigManager:
         # refreshing local note data
         await self.refresh_local_data_with_name(self.note_data["name"])
 
-    async def change_friends_access(self):
+    async def change_friends_access(self) -> None:
         """
-        Method lets owner to specify weather certain user can write or only read note
-        :return:
+        Method lets owner specify weather certain user can write or only read note
         """
+        # checking if user wanting to make notifications is the author
         if self.note_data["author"] != dataM.user.data["nick"]:
             print("\n Only author can perform this action \n")
             return
 
+        # selecting required data
         if "write_list" in self.note_data.keys():
             loc_write_list = self.note_data["write_list"]
         else:
@@ -284,6 +281,7 @@ class NotesConfigManager:
 
         selection_can_write = False
 
+        # checking if selected user can modify note
         if loc_read_list[choice] in loc_write_list:
             selection_can_write = True
 
@@ -292,7 +290,7 @@ class NotesConfigManager:
         else:
             print("Selected user can't edit note do you want to change that?")
 
-        decision = input("Y or N: ")
+        decision: str = input("Y or N: ")
 
         # modifying local copy
         if decision == "Y":
@@ -312,21 +310,20 @@ class NotesConfigManager:
         # refreshing local data
         await self.refresh_local_data_with_name(self.note_data["name"])
 
-    async def go_back_to_old_version(self):
+    async def go_back_to_old_version(self) -> None:
         """
         Lets user set one of the old versions of the note as a new one
-        :return:
         """
-        current_version = int(self.note_data["version"])
+        current_version: int = int(self.note_data["version"])
 
         print("Current version is ", current_version, ". To which previous version do you want to go back to?")
-        choice = m_utility.handle_selection()
+        choice: int = m_utility.handle_selection()
 
         if choice > current_version:
             return
 
         # removing local copy of now old version
-        final_path = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
+        final_path: str = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
 
         if os.path.exists(final_path):
             os.remove(final_path)
@@ -353,12 +350,13 @@ class NotesConfigManager:
         await self.refresh_local_data_with_name(new_name)
         await self.update_remotes(old_name, new_name)
 
-    def __get_name_modyfied(self, name):
+    def __get_name_modyfied(self, name: str) -> tuple[str, int]:
         """
+        Modification basically increases version number at the end.
         :param name:
         Name to be modified
         :return:
-        Returns modified name of a note. Modification basically increases version number at the end.
+        Returns modified name of a note and new version number.
         """
         old_name = name
         name_components = old_name.split("_")
@@ -367,25 +365,26 @@ class NotesConfigManager:
         new_name = name_components[0] + "_v" + str(new_version_number)
         return new_name, new_version_number
 
-    def prepare_to_go_back(self):
+    def prepare_to_go_back(self) -> None:
         """
         Deletes local copy of the file currently being configured
-        :return:
         """
         final_path = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
         if os.path.exists(final_path):
             os.remove(final_path)
 
-    def export_to_pdf(self):
+    def export_to_pdf(self) -> None:
         """
         If note is downloaded method exports text from note into new pdf file.
-        :return:
         """
+        # checks if note is downloaded
         note_name = self.note_data["name"]
         final_path = dataM.user.data['path'] + "/" + note_name + ".txt"
         if not os.path.exists(final_path):
             print("\nFirst you have to download the note!!\n")
             return
+
+        # generates pdf
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=15)
@@ -396,15 +395,17 @@ class NotesConfigManager:
         pdf_path = dataM.user.data["path"] + "/" + note_name + ".pdf"
         pdf.output(name=pdf_path, dest='F').encode('latin-1')
 
-    def read_note(self):
+    def read_note(self) -> None:
         """
-        Method reads specified note
-        :return:
+        Method reads specified note using google text to speech library
         """
-        final_path = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
+        # checks if note is downloaded
+        final_path: str = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
         if not os.path.exists(final_path):
             print("\nFirst you have to download the note!!\n")
             return
+
+        # generates speech
         file = open(final_path, "r")
         text_to_read = file.read().replace("\n", " ")
         result = gTTS(text=text_to_read, lang='en', slow=False)
@@ -412,5 +413,6 @@ class NotesConfigManager:
         file.close()
         result.save(result_path)
 
-        subprocess.call(["afplay", result_path])
+        # plays generated file
+        subprocess.run(["afplay", result_path])
         os.remove(result_path)

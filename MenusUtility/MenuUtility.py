@@ -1,4 +1,4 @@
-def handle_selection():
+def handle_selection() -> int:
     """
     Method protects program from invalid input
     :return:

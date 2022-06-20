@@ -5,11 +5,13 @@ import Data.dataManager as dataM
 from datetime import date
 import MenusUtility.MenuUtility as m_utility
 import os
+from typing import Optional
 
 storage = dataM.firebase.storage()
 
+
 class NotesManager:
-    async def createNote(self):
+    async def createNote(self) -> None:
         """
         method creates new note on local machine
         sends start note to database and creates note entity
@@ -20,7 +22,7 @@ class NotesManager:
         name = name + "_v1"
         validation_task = await self.get_note_by_name(str(name))
 
-        #checking if note with provided name already exists
+        # checking if note with provided name already exists
         while validation_task is not None:
             print("\n !!Note with this name already exists!! \n")
             name = input("How do you want to name your file? : ")
@@ -29,12 +31,12 @@ class NotesManager:
             if name == "back":
                 return
 
-        #setting destination path for new file
+        # setting destination path for new file
         final_path = dataM.user.data['path'] + "/" + name + ".txt"
         with open(final_path, 'w') as f:
             f.write("This is your new note! ", )
 
-        #sending file to database and creating note entity
+        # sending file to database and creating note entity
         storage.child(name).put(final_path)
         link = storage.child(name).get_url(None)
         data = {
@@ -48,11 +50,10 @@ class NotesManager:
 
         dataM.db.child("notes").push(data)
 
-        #removing local copy in order
+        # removing local copy in order
         os.remove(final_path)
 
-
-    async def get_note_by_name(self, name: str):
+    async def get_note_by_name(self, name: str) -> Optional[tuple[dict[str, str], str]]:
         """
         returns None if note doesn't exist and result if exists
         :param name:
@@ -67,11 +68,12 @@ class NotesManager:
             id = next(iter((result.val().keys())))
             return result.val().get(id), id
 
-    def __get_note_by_name_call(self, name: str):
+    def __get_note_by_name_call(self, name: str) -> Optional[dict[str, dict[str, str]]]:
         """
-        Returns note with specified name
         :param name:
+        Name of interest
         :return:
+        Returns note with specified name
         """
         try:
             note = dataM.db.child("notes").order_by_child("name").equal_to(name).get()
@@ -81,11 +83,12 @@ class NotesManager:
             error_message = json.loads(error_json)['error']['message']
             print(error_message)
 
-    async def get_notes_for_user_with_nick(self, nick: str):
+    async def get_notes_for_user_with_nick(self, nick: str) -> list[str]:
         """
-        returns all notes with author whos nick is the same as parameter
         :param nick:
+        Nickname of interest
         :return:
+        returns all notes with author whose nick is the same as parameter
         """
         loop = asyncio.get_event_loop()
         call_task = loop.run_in_executor(None, self.__get_notes_by_nick, nick)
@@ -100,10 +103,11 @@ class NotesManager:
                     notes.append(note)
         return notes
 
-    def __get_notes_by_nick(self, nick: str):
+    def __get_notes_by_nick(self, nick: str) -> Optional[dict[str, dict[str, str]]]:
         """
-        database call for all notes with author whos nick is the same as parameter
+        database call for all notes with author whose nick is the same as parameter
         :param nick:
+        Nickname of interest
         :return:
         """
         try:
@@ -114,12 +118,13 @@ class NotesManager:
             error_message = json.loads(error_json)['error']['message']
             print(error_message)
 
-    async def remove_note(self):
+    async def remove_note(self) -> None:
         """
-        enables user to remove note with specific name
+        Enables user to remove note with specific name
         :return:
         """
 
+        # checks if there are any notes in database
         notes = await self.get_notes_for_user_with_nick(dataM.user.data["nick"])
         index = 0
         if len(notes) == 0:
@@ -142,7 +147,7 @@ class NotesManager:
             note_id = note_task[1]
 
             # deleting all archived versions of note
-            for version in range(int(note_data['version'])+1):
+            for version in range(int(note_data['version']) + 1):
                 note_name = notes[choice]
                 note_name = note_name[:-1] + str(version)
                 try:

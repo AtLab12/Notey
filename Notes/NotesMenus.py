@@ -4,7 +4,11 @@ from Notes import NotesConfigManager as notesConfM
 import Data.dataManager as dataM
 
 
-def print_main_notes_menu():
+def print_main_notes_menu() -> None:
+    """
+    Displays main note menu
+    :return:
+    """
     menu = {
         1: "See your notes",
         2: "Create new note",
@@ -18,7 +22,16 @@ def print_main_notes_menu():
     print('\n')
 
 
-async def run_notes():
+async def run_notes() -> None:
+    """
+    Function enables:
+    1. Displaying existing notes
+    2. Create new note
+    3. Deleting note
+    4. Going to configuration menu
+    5. Going back to main menu
+    :return:
+    """
     print("Please select one of the following options: ")
     print_main_notes_menu()
     choice = mUtility.handle_selection()
@@ -44,7 +57,11 @@ async def run_notes():
         choice = mUtility.handle_selection()
 
 
-def print_select_note_menu():
+def print_select_note_menu() -> None:
+    """
+    Displays configuration menu
+    :return:
+    """
     menu = {
         1: "Download note",
         2: "Save note",
@@ -62,10 +79,20 @@ def print_select_note_menu():
     print('\n')
 
 
-async def run_select_note():
+async def run_select_note() -> None:
     """
     Before function shows menu it checks if user has any existing notes.
     Only if he does, will he be shown the config menu
+    It enables:
+    1: Download note
+    2: Save note
+    3: Add friend to note
+    4: Remove friend from note
+    5: Change friends access level
+    6: Go back to old version
+    7: Export note to PDF
+    8: Read note
+    9: Go back to general note menu
     :return:
     """
     # getting all users notes
@@ -75,6 +102,7 @@ async def run_select_note():
         print("You don't have any notes. Please create one to proceed")
         return
 
+    # selects based on input note to be configured
     print("Which note do you want to perform actions on?")
     index = 0
     for note in notes:
@@ -82,6 +110,7 @@ async def run_select_note():
         index += 1
     print("\n")
     selected_note = mUtility.handle_selection()
+
     # leaving config
     if selected_note >= index:
         return

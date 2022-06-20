@@ -184,6 +184,7 @@ class SocialNetwork:
         for word in words:
             values[word] = self.__calculate_distance(word, input_word)
 
+
         result = dict(sorted(values.items(), key=lambda x: x[1]))
         return result
 
