@@ -8,7 +8,7 @@ import Data.dataManager as dataM
 auth = authC.Authorization()
 
 
-def print_menu():
+def print_menu() -> None:
     """
     Function displays initial menu.
     :return:
@@ -24,7 +24,7 @@ def print_menu():
     print('\n')
 
 
-async def run_notey():
+async def run_notey() -> None:
     """
     Function enables login, registration, resetting password and quiting application.
     :return:
@@ -38,8 +38,8 @@ async def run_notey():
         if choice == 1:
             registration_task = asyncio.create_task(auth.sign_up())
             await registration_task
-            if registration_task.result() == '':
-                print("Registration unsuccessful. Please try again")
+            if not registration_task.result():
+                print("Registration unsuccessful. Please try again!")
         elif choice == 2:
             login_task = asyncio.create_task(auth.login())
             await login_task
@@ -64,7 +64,7 @@ async def run_notey():
         choice = mUtility.handle_selection()
 
 
-def print_main_menu():
+def print_main_menu() -> None:
     """
     Function displays main menu for logged user.
     This menu is only accessible by a logged-in user.
@@ -81,7 +81,7 @@ def print_main_menu():
     print('\n')
 
 
-async def run_main():
+async def run_main() -> None:
     """
     This method is the navigation center of the whole project.
     It handles all functionalities for logged-in user.
