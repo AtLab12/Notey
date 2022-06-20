@@ -4,7 +4,12 @@ import SocialNetworking.SocialNetwork as socialNet
 
 socialNetwork = socialNet.SocialNetwork()
 
-def print_friend_menu():
+
+def print_friend_menu() -> None:
+    """
+    Function displays social media menu
+    :return:
+    """
     menu = {
         1: "See your friends",
         2: "Check for new requests",
@@ -18,9 +23,14 @@ def print_friend_menu():
     print('\n')
 
 
-async def run_friends():
+async def run_friends() -> None:
     """
-    Presents friends section menu
+    Function enables:
+    1. Displaying list of your friends
+    2. Checking for new friend requests
+    3. Sending new friend request
+    4. Removing friend from friend list
+    5. Going back to main menu
     :return:
     """
     print("Please select one of the following options: ")

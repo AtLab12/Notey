@@ -171,7 +171,7 @@ class Authorization:
         String representing users email address
         :return:
         """
-        regex = '^(.*?)@(.*?)(.pl)'
+        regex = '^(.*?)@(.*?)(.com)'
         if email is not None:
             if re.match(regex, email):
                 return True

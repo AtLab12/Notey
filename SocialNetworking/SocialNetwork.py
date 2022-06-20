@@ -4,14 +4,16 @@ import MenusUtility.MenuUtility as m_utility
 
 
 class SocialNetwork:
-    async def send_request(self, nick: str):
+    async def send_request(self, nick: str) -> None:
         """
         method checks if user with provided email exists
         checks if currently logged in user haven't already requested a friendship
         send friendship request to desired user
         :param nick:
+        Nick of a user one want to add as a friend
         :return:
         """
+        # checks if user want to add himself as a friend
         if nick == dataM.user.data["nick"]:
             print("You can't add yourself as friend silly ;)")
             return
@@ -20,6 +22,7 @@ class SocialNetwork:
         check_task = dataM.data_management.get_user_by_nick(nick)
         user_data = await check_task
 
+        # checks if user with provided email exists
         if user_data is not None:
             if "requests" in user_data[0]:
                 req = user_data[0]["requests"]
@@ -34,12 +37,15 @@ class SocialNetwork:
             else:
                 print("You already sent request to this user")
         else:
+            # checks if there are any users with similar nicknames
+            # by calculating levenshtein distance for every nickname
             get_all_task = dataM.data_management.get_all_users()
             result = await get_all_task
             candidates = self.__sort_words_by_distance(result, nick)
-            candidates = dict(sorted(candidates.items(), key=lambda x:x[1]))
             finalists: [str] = []
 
+            # if there are users with similar nicknames fives option
+            # to add one as a friend
             if len(candidates) > 0:
                 for key in candidates.keys():
                     if candidates[key] <= 6 and key != dataM.user.data["nick"]:
@@ -58,18 +64,21 @@ class SocialNetwork:
             else:
                 return
 
-    async def handle_myrequests(self):
+    async def handle_myrequests(self) -> None:
         """
         Refreshes users current data
         Shows all requests
         Handles request acceptance for both users
         :return:
         """
+        # gets newest request data
         task = dataM.data_management.get_user_by_email(dataM.user.data["email"])
         result = await task
         dataM.user.data = result[0]
         index = 0
         my_nick = dataM.user.data["nick"]
+
+        # shows all requests
         if "requests" in list(dataM.user.data.keys()):
             print("\nPeople who want to be your friends: ")
             for req_nick in dataM.user.data["requests"]:
@@ -79,6 +88,7 @@ class SocialNetwork:
             print("\nNo new requests\n")
             return
 
+        # adds specified friend to friend list or goes back to friend menu
         print("Who do you want to accept as a friend? (type noOne to quit)")
         new_friend = input()
         if new_friend == "noOne" or new_friend == 0:
@@ -110,6 +120,7 @@ class SocialNetwork:
                     else:
                         friends = []
 
+                    # data synchronization between user and new friend
                     friends.append(new_friend_nick)
                     loc_id = dataM.user.user_id
                     dataM.db.child("users").child(loc_id).update({"friends": friends})
@@ -119,19 +130,24 @@ class SocialNetwork:
                     dataM.db.child("users").child(loc_id).update({"requests": loc_req})
                     await dataM.data_management.refresh_data()
 
-    async def run_remove_friend(self):
+    async def run_remove_friend(self) -> None:
         """
         Deletes friend based on user selection.
-        Automatically deletes currenty logged in user from the currently beeing deleted friends list.
+        Automatically deletes current logged-in user from the currently being deleted friends list.
         :return:
         """
+
         if "friends" in dataM.user.data.keys():
             index = 0
             for friend in dataM.user.data["friends"]:
                 print(index, ": ", friend)
                 index += 1
             selection = input("Who do you want to remove? \n")
-            if selection == "back": return
+
+            if selection == "back":
+                return
+
+            # synchronizes data between user and friend being deleted
             if selection.isdigit() and int(selection) < index:
                 selected_friend_nick = dataM.user.data["friends"][int(selection)]
                 selected_friend_task = dataM.data_management.get_user_by_nick(selected_friend_nick)
@@ -152,15 +168,35 @@ class SocialNetwork:
         else:
             print("You don't have any friends to remove yet")
 
-    def __sort_words_by_distance(self, words: [str], input_word):
+        await dataM.data_management.refresh_data()
+
+    def __sort_words_by_distance(self, words: [str], input_word) -> dict[str, int]:
+        """
+        :param words:
+        Words to calculate levenshtein distance.
+        :param input_word:
+        Users original input.
+        :return:
+        Returns a sorted dictionary with a word distance from original input
+        from smallest to biggest.
+        """
         values = {}
         for word in words:
             values[word] = self.__calculate_distance(word, input_word)
-        return values
 
+        result = dict(sorted(values.items(), key=lambda x: x[1]))
+        return result
 
+    def __calculate_distance(self, word: str, input_word) -> int:
+        """
+        :param word:
+        First word
+        :param input_word:
+        Second word.
+        :return:
+        Returns levenshtein distance between first and second word.
+        """
 
-    def __calculate_distance(self, word: str, input_word):
         def create_matrix_for_word(word1, word2):
             num_of_rows = len(str(word1))
             num_of_collumns = len(str(word2))
