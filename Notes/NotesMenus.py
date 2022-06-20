@@ -93,7 +93,7 @@ async def run_select_note():
 
     notes_config_manager = notesConfM.NotesConfigManager(selected_note_id,selected_note_data)
 
-    print("(Selected: ", selected_note_data["name"], ")")
+    print("(Selected: ", notes_config_manager.note_data["name"], ")")
     print_select_note_menu()
     choice = mUtility.handle_selection()
 
@@ -118,6 +118,6 @@ async def run_select_note():
             notes_config_manager.prepare_to_go_back()
             break
 
-        print("(Selected: ", selected_note_data["name"], ")")
+        print("(Selected: ", notes_config_manager.note_data["name"], ")")
         print_select_note_menu()
         choice = mUtility.handle_selection()

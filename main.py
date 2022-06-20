@@ -9,6 +9,10 @@ auth = authC.Authorization()
 
 
 def print_menu():
+    """
+    Function displays initial menu.
+    :return:
+    """
     menu = {
         1: 'Register',
         2: 'Login',
@@ -22,7 +26,7 @@ def print_menu():
 
 async def run_notey():
     """
-    Method enables login or registration.
+    Function enables login, registration, resetting password and quiting application.
     :return:
     """
     print("Welcome to Notey!")
@@ -61,6 +65,11 @@ async def run_notey():
 
 
 def print_main_menu():
+    """
+    Function displays main menu for logged user.
+    This menu is only accessible by a logged-in user.
+    :return:
+    """
     menu = {
         1: 'Friends',
         2: 'Notes',
@@ -74,8 +83,8 @@ def print_main_menu():
 
 async def run_main():
     """
-    This method is the center of the whole project.
-    It handles all functionalities for logged in user.
+    This method is the navigation center of the whole project.
+    It handles all functionalities for logged-in user.
     :return:
     """
     print("Please select one of the following options: ")
@@ -95,5 +104,5 @@ async def run_main():
         print_main_menu()
         choice = mUtility.handle_selection()
 
-
+# here we run the whole app
 asyncio.run(run_notey())

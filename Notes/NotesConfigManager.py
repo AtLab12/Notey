@@ -1,11 +1,14 @@
 import Data.dataManager as dataM
 import os
+import requests
+import json
 import urllib
 from Notes import NotesManager as notesM
 import MenusUtility.MenuUtility as m_utility
 from fpdf import FPDF
 from gtts import gTTS
 import subprocess
+
 
 class NotesConfigManager:
 
@@ -45,9 +48,13 @@ class NotesConfigManager:
         """
         url = self.note_data["link"]
         try:
+            # print(url)
             urllib.request.urlretrieve(url, path)
-        except:
-            pass
+        except requests.exceptions.HTTPError as e:
+            error_json = e.args[1]
+            error_message = json.loads(error_json)['error']['message']
+            print(error_message)
+            return
 
     async def save_note(self):
         """
@@ -64,6 +71,8 @@ class NotesConfigManager:
             if self.note_data["author"] != dataM.user.data["nick"]:
                 print("You can't edit this note. Please contact the author")
                 return
+
+        print("test if here")
 
         old_name = self.note_data["name"]
         new_data = self.__get_name_modyfied(old_name)
@@ -360,7 +369,7 @@ class NotesConfigManager:
 
     def prepare_to_go_back(self):
         """
-        Deletes local copy of the file currently beeing configured
+        Deletes local copy of the file currently being configured
         :return:
         """
         final_path = dataM.user.data['path'] + "/" + self.note_data["name"] + ".txt"
@@ -369,7 +378,7 @@ class NotesConfigManager:
 
     def export_to_pdf(self):
         """
-        If note is donloaded method exports text from note into new pdf file.
+        If note is downloaded method exports text from note into new pdf file.
         :return:
         """
         note_name = self.note_data["name"]
@@ -383,7 +392,7 @@ class NotesConfigManager:
         pdf.cell(200, 10, txt=note_name, ln=1, align='C')
         f = open(final_path, "r")
         for x in f:
-            pdf.cell(200, 10, txt = x, ln = 1, align = 'C')
+            pdf.cell(200, 10, txt=x, ln=1, align='C')
         pdf_path = dataM.user.data["path"] + "/" + note_name + ".pdf"
         pdf.output(name=pdf_path, dest='F').encode('latin-1')
 

@@ -114,7 +114,7 @@ class NotesManager:
             error_message = json.loads(error_json)['error']['message']
             print(error_message)
 
-    async def remove_note(self): #### handel all archive files also #####
+    async def remove_note(self):
         """
         enables user to remove note with specific name
         :return:
@@ -136,13 +136,26 @@ class NotesManager:
         if choice >= index:
             return
         else:
-            #we delete both the file and the note entity
-            note_data = await self.get_note_by_name(notes[choice])
-            storage.child(notes[choice]).delete(notes[choice], dataM.user.token)
-            dataM.db.child("notes").child(note_data[1]).remove()
-            #deleting local copy
+            # we delete both the file and the note entity
+            note_task = await self.get_note_by_name(notes[choice])
+            note_data = note_task[0]
+            note_id = note_task[1]
+
+            # deleting all archived versions of note
+            for version in range(int(note_data['version'])+1):
+                note_name = notes[choice]
+                note_name = note_name[:-1] + str(version)
+                try:
+                    storage.child(note_name).delete(note_name, dataM.user.token)
+                except:
+                    pass
+
+            dataM.db.child("notes").child(note_id).remove()
+
+            # deleting local copy
             file_path = dataM.user.data["path"] + "/" + notes[choice] + ".txt"
             if os.path.exists(file_path):
                 os.remove(file_path)
+
 
 notes_manager = NotesManager()
