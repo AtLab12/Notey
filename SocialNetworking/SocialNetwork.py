@@ -48,7 +48,7 @@ class SocialNetwork:
             # to add one as a friend
             if len(candidates) > 0:
                 for key in candidates.keys():
-                    if candidates[key] <= 6 and key != dataM.user.data["nick"]:
+                    if candidates[key] <= 3 and key != dataM.user.data["nick"]:
                         finalists.append(key)
 
                 print("Did you mean to send request to one of these users? \n")
@@ -170,7 +170,7 @@ class SocialNetwork:
 
         await dataM.data_management.refresh_data()
 
-    def __sort_words_by_distance(self, words: [str], input_word) -> dict[str, int]:
+    def __sort_words_by_distance(self, words: [str], input_word: str) -> dict[str, int]:
         """
         :param words:
         Words to calculate levenshtein distance.
@@ -187,7 +187,7 @@ class SocialNetwork:
         result = dict(sorted(values.items(), key=lambda x: x[1]))
         return result
 
-    def __calculate_distance(self, word: str, input_word) -> int:
+    def __calculate_distance(self, word: str, input_word: str) -> int:
         """
         :param word:
         First word
@@ -197,9 +197,9 @@ class SocialNetwork:
         Returns levenshtein distance between first and second word.
         """
 
-        def create_matrix_for_word(word1, word2):
-            num_of_rows = len(str(word1))
-            num_of_collumns = len(str(word2))
+        def create_matrix_for_word(word1: str, word2: str):
+            num_of_rows = len(word1)
+            num_of_collumns = len(word2)
             matrix = []
             tmp = []
             for col_num in range(0, num_of_collumns + 1):
@@ -209,7 +209,7 @@ class SocialNetwork:
                 matrix.append([numOfRows])
             return matrix
 
-        def find_minimum(matrix, cor, val):
+        def find_minimum(matrix: list[list[int]], cor: tuple[int, int], val: int):
             matrix[cor[0]].append(val)
             base = matrix[cor[0]][cor[1]]
             tmp = [
